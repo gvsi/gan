@@ -1,4 +1,4 @@
-#!/Users/gvsi/anaconda3/envs/gan/bin/python3
+#!/usr/bin/python
 
 import os
 import sys
@@ -10,7 +10,6 @@ from gym.envs.registration import register, spec
 from datetime import datetime
 from json_tricks import dumps, loads
 from tqdm import tqdm
-
 from math import sqrt
 
 class Experiment(object):
@@ -94,12 +93,26 @@ def new_env(env_map, slippery=True, MY_ENV_NAME='MyFrozenLake-v0'):
     env = gym.make(MY_ENV_NAME)
     return env
 
+lines = []
+
 for line in sys.stdin:
     w = line.strip()
-    n = int(sqrt(len(w)))
-    # split into lines
-    map_str = [w[i:i+n] for i in range(0, len(w), n)]
-    env = new_env(map_str, slippery=True)
-    exp = Experiment(env, num_episodes=10000)
-    exp.run()
-    print(w + "\t" + exp.dumps())
+    lines.append(w)
+
+random.shuffle(lines)
+
+while lines:
+    w = lines.pop()
+    if os.path.isfile("res/"+w+".txt"):
+        continue
+    else:
+        os.mknod("res/"+w+".txt")
+        n = int(sqrt(len(w)))
+        # split into lines
+        map_str = [w[i:i+n] for i in range(0, len(w), n)]
+        env = new_env(map_str, slippery=True)
+        exp = Experiment(env, num_episodes=10000)
+        exp.run()
+        f = open("res/"+w+".txt","w+")
+        f.write(w+"\t" + str(exp.dumps()))
+        f.close()
