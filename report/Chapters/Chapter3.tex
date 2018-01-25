@@ -6,6 +6,34 @@
 
 %----------------------------------------------------------------------------------------
 
+In this chapter we report the process that went into choosing the environments that we will be using in the project's simulations, and from which we will be basing our simulations.
+
+There are many choices of environments and tasks that are publicly available. Some of these we will be introduce in this chapter.
+
+What makes this step non-trivial and deserving of its own chapter is that different reinforcement learning techniques are more suitable to different categories of tasks. Similarly, different machine learning and deep learning techniques are more or less efficient when applied to different tasks.
+
+In a research effort that is heavily dependent on building reinforcement learning and deep learning models, the choice of environment is a critical one.
+
+Furthermore, we also need to achieve this without losing focus on the main motivations for the whole project (Chapter~\ref{Chapter1}): \textit{optimising reinforcement learning algorithms by adding transferability of pre-trained models on unseen maps or configurations of a task}.
+
+This last point implies that a substantial part of the computational work in the project will be about training hundreds of thousands of reinforcement learning models to build a dataset over a distribution of different maps (we present this in Chapter~\ref{Chapter4}). This is an important point: in the many experiments we ran, this turned out to be the biggest bottleneck, and required devices to distribute computations across multiple machines to make the computational time feasible in the timespan allocated to the project.
+
+With these points in mind and given the experimental nature of the work, we conclude that a bottom-up approach in complexity is preferable. Given successful results with "easier" tasks, we can scale up in complexity and hopefully formalise and generalise our approach to more tasks (Chapter~\ref{Chapter7}).
+
+Easier tasks will enable us to explore different reinforcement learning approaches that we introduced in Subsection~\ref{RL} with the guarantee that they will give satisfiable results. We can use these results as a foundation of the further steps (specifically Generative Adversarial Networks training in Chapter~\ref{Chapter5}).
+
+Before introducing candidate environments, let us define what is meant by an "easy" reinforcement learning task. What we are looking for is ideally a task with a discrete and relatively small set of observable states and actions. Why does this conditional make the task easier?
+
+Imagine building a tree (such as the one shown in figure~\ref{fig:RLTree} with all possible states-action transitions, until we either: 1) reach a goal state, or 2) reach an arbitrarily maximum iteration time step $t = \eta$ (to prevent infinite iterations). Also assume we were traversing this tree in a bruteforce manner (worst-case scenario of reinforcement learning resolutions), then we would need to visit each node of the tree, until we arrive at the leaves, which will report the achieved reward for the agent given the path it has taken to get there.
+The breath and depth of the state-action tree will increase as we increase the possible set of states we would need to traverse, adding up to the space and time complexity of our solution, which is exponential in $\#S$ and $\#A$ for both space and time ($\#S$ indicates the cardinality of a set S).
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{Figures/RLTree}
+\caption{Sample state-action tree}
+\label{fig:RLTree}
+\end{figure}
+
 \section{OpenAI Gym}
 \subsection{Motivation}
 \subsection{Algorithmic environments}
