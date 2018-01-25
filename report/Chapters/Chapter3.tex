@@ -39,7 +39,7 @@ Let's explore some candidate environments next.
 \end{figure}
 
 \section{OpenAI Gym}
-OpenAI Gym \citep{1606.01540} provides a toolkit that aids in the process of building reinforcement learning systems and evaluating algorithms to solve such tasks.
+OpenAI Gym \parencite{1606.01540} provides a toolkit that aids in the process of building reinforcement learning systems and evaluating algorithms to solve such tasks.
 
 OpenAI Gym provides an environment interface \code{Env}. The interface abstracts the following operations on an environment:
 
@@ -58,8 +58,8 @@ In this project we will mostly deal with environments provided in the OpenAI Gym
 	\item it abstracts the need to implement the logic of a separate environment, adding a point of failure to our whole (quite experimental) work, as well as imposing a bigger time constraint to the one we already have;
 	\item OpenAI Gym has become a standard academic tool for reinforcement learning researchers, therefore many papers and articles build on top of this framework;
 	\item environment implementations are constantly expanding and being revised by an active community, also thanks to the support of the overarching organisation (OpenAI);
-	\item the core implementation of the \code{gym} module allows for straightforward extensions on existing environments, which, as we will see in subsection~\ref{ExtendedBaseline}, will be critical in this project;
-	\item while sadly not applicable anymore, OpenAI Gym used to provide and support an online platform for developers to compare the performance of different reinforcement learning algorithms for each task. This was in a form of a leaderboard, measuring the performance of the implementation, as well as providing the implementation and data of winning techniques. Such data could have been used directly as input to our Generative Adversarial Networks.
+	\item the core implementation of the \code{gym} module \parencite{gymgymat12:online} allows for straightforward extensions on existing environments, which, as we will see in subsection~\ref{ExtendedBaseline}, will be critical in this project;
+	\item while sadly not applicable anymore, OpenAI Gym used to provide and support an online platform for developers to compare the performance of different reinforcement learning algorithms for each task. This was in a form of a leaderboard, measuring the performances, as well as providing the implementation and data of winning techniques. Such data could have been used directly as input to our Generative Adversarial Networks.
 \end{itemize}
 
 \subsection{Algorithmic environments}
@@ -69,9 +69,43 @@ In this project we will mostly deal with environments provided in the OpenAI Gym
 %----------------------------------------------------------------------------------------
 
 \section{Baseline: \code{FrozenLake-v0}}
+One of our baseline environments is \code{FrozenLake-v0} \parencite{OpenAIGy42:online}, one of the algorithmic environments provided in the OpenAI Gym. In this section we describe the task, motivation for choosing it as one of our baseline models, and some shortcomings that we faced in using this environment in our project's pipeline.
 \subsection{Description of the task}
-\subsection{Motivation}
-\subsection{Shortcomings}
+In \code{FrozenLake-v0} we control an agent in a grid world, more precisely the grid shown in figure~\ref{tab:FrozenLakev0}. The objective is to go from a starting tile (\code{S}) to a goal state (\code{G}), by moving in four possible directions from a tile: up, down, left and right.
+
+What differentiates this from a trivial path-finding or planning problem, is:
+\begin{enumerate}
+	\item there are both walkable and non-walkable tiles in the grid (these are respectively frozen tiles \code{F} and holes \code{H}), and
+	\item tiles are "slippery" meaning that the movement direction of the agent is uncertain and only partially depends on the chosen direction, i.e. the direction is non-deterministic.
+\end{enumerate}
+
+The reward in \code{FrozenLake-v0} is $1$ for reaching the goal state, and $0$ for being in any other state. The system stops executing when the agent falls into a hole, and the environment has to reset.
+
+\begin{table}[]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\cellcolor[HTML]{68CBD0}\textbf{S} & F & F & F \\ \hline
+F & \cellcolor[HTML]{CE6301}H & F & \cellcolor[HTML]{CE6301}H \\ \hline
+F & F & F & \cellcolor[HTML]{CE6301}H \\ \hline
+\cellcolor[HTML]{CE6301}H & F & F & \cellcolor[HTML]{32CB00}\textbf{G} \\ \hline
+\end{tabular}
+\caption{\code{FrozenLake-v0}'s default 4x4 configuration}
+\label{tab:FrozenLakev0}
+\end{table}
+
+\subsection{Motivation and shortcomings}
+\code{FrozenLake-v0} is generally classified as a straightforward reinforcement learning task. An optimal solution could be found by creating a model of the environment, that is merely recording where frozen tiles are while exploring the grid world. This is a \emph{model-based} approach to reinforcement learning, and it is perhaps less interesting that learning by exploration, without being biased by the particular configurations of the map.
+
+\emph{Model-free} algorithms, like Q-learning, need no accurate representation specific to the environment, and they are therefore more transferable to different configurations of the map or even to different tasks, which is the final objective of our project.
+
+In fact, let's take the case of Q-learning applied to \code{FrozenLake-v0}: we do not need to have an explicit knowledge of the dynamics of each different tiles. We do not build a policy that explicitly favours movements towards frozen tiles or towards the goal. In fact, the agent does not have a model of what a frozen tile, or the goal tile or a hole are--it just learns by exploration that there it is rewarded when it gets to the goal state, and that is what it aims for implicitly.
+
+This is the sort of behaviour that we can transfer to different tasks--again our ultimate objective.
+\\\\
+In its current OpenAI Gym implementation \code{FrozenLake-v0} is a static map with the fixed configuration that is shown in figure~\ref{tab:FrozenLakev0}. There is currently no way to generate random configurations of the map, so we will be extending this implementation to account for that.
+
+Before we move on, let's contextualise this in the bigger picture as to not lose focus. Why do we need different configurations of the map, again? We want to train reinforcement learning models on different configurations so that we can have a distribution of policies over different maps which we can use as input to our GAN, thereby training a Generator network to spawn new policies for unseen configurations without having to find it through (computationally expensive) reinforcement learning algorithms!
 
 \section{Extended baseline: Randomised Frozen Lake}
 \label{ExtendedBaseline}
