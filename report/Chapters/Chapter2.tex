@@ -35,6 +35,7 @@ In figure~\ref{fig:MDP} we show a sample schematic of a Markov Decision Process,
 
 
 \subsection{Q-learning}
+\label{qlearning}
 Now that we contextualised reinforcement learning environments as Markov Decision Processes, we can introduce the final objective of reinforcement learning tasks: finding a function $\Pi:S\mapsto A$ called \textbf{policy}, that maps the appropriate action $a\in A$ given the current state $s\in S$, as to maximise our agent's final reward.
 
 In particular, we will now present Q-learning, an algorithm that yields such optimal policy given an MDP.
@@ -60,7 +61,7 @@ where:
 What is our optimal policy when we do Q-learning then? After training, it is simply that function $\pi: S \to A$ that, for each state, returns the action with maximum expected utility in our Q-table.
 
 \subsection{Exploration/Exploitation tradeoff}
-An important theme in reinforcement learning, and that we heavily focus our attention on in our project is the idea of the tradeoff between Exploration and Exploidation.
+An important theme in reinforcement learning, and that we heavily focus our attention on in our project is the idea of the tradeoff between Exploration and Exploitation.
 
 \subsection{Deep Reinforcement Learning}
 \subsubsection{DQGAN}
