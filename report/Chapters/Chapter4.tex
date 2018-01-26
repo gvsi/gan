@@ -1,11 +1,71 @@
 % Chapter 4
 
 \chapter{Dataset creation}
-
 \label{Chapter4}
+
+In Chapter~\ref{Chapter3} we finalised our OpenAI environment choice and have a systematic way to generate different configurations of our environments.
+
+The next step is to build up our dataset by solving as many of these configurations as possible with the use of reinforcement learning algorithms.
+
+We justified in previous sections (specifically section~\ref{qlearning} and section~\ref{movationandshortcomings}) how using \emph{model-free} reinforcement learning algorithms will put us in the right direction to achieve the project's goals highlighted in section~\ref{motivation}: improve the transferability of pre-trained models to different configurations, environments, and tasks.
+
+One choice that is left to make before we move on to train models using our randomised environments is what reinforcement learning algorithm we should use.
 
 %----------------------------------------------------------------------------------------
 
-\section{MapReduce job}
+\section{Q-learning on \code{RandomisedFrozenLake}}
+We have presented Q-learning in section~\ref{qlearning} as a method that generates a policy by building up a table $Q$ of values corresponding to the expected utility of taking each action at each observable state.
+
+This table $Q$ is represented as a 2D-matrix of size (\code{env.observation\_space.n}, \code{env.action\_space.n}), which in the case of \code{RandomisedFrozenLake} is just a (16x4) matrix.
+
+This is good news. Having a policy that is encoded as a 2-dimensional data structure makes it an obvious input to our Generative Adversarial Network later on in the next chapter. In fact, as we presented in section~\ref{successes}, GANs have proven successful in image synthesis applications, where inputs were images, that is 2D matrices.
+
+The choice of Q-learning as our reinforcement learning technique therefore becomes preferable. Other model-free algorithms like policy search may not have a clear 2D representation in the way the trained parameter set $\theta$ is encoded.
+
+%----------------------------------------------------------------------------------------
+
+\section{Experiment set up}
+Before we proceed, we need to be able to record some details about the process of training our data. If our ultimate objective is to benchmark performance of traditional reinforcement learning agains our proposed approach, we need to record running time of our training, and see if that improves at the end. 
+
+Let's encapsulate training of a configuration in an \code{Experiment} class, whose code is shown in listing~\ref{lst:experiment}. An \code{Experiment} is initialised with an OpenAI Gym environment, which in our case is an instance of a \code{RandomisedFrozenLake}, and an integer value \code{num\_episodes}, indicating the number of independent simulations the Q-learning algorithm will be doing. By calling \code{Experiment}'s \code{run()} instance method, we actually start training the model, with $Q$ being updated at each iteration.
+
+The instance variable \code{score} could be used as an evaluation criteria of the effectiveness of our training. It records the average reward the agent achieves for each episode during training.
+
+\code{Experiment} also has a utility method called \code{dumps()} that serialises all this data and allows us to save it on disk.
+\\\\
+\begin{minipage}{\linewidth}
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={\code{Experiment} wrapper class to train one instance of \code{RandomisedFrozenLake}}}
+\lstset{label={lst:experiment}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+class Experiment(object):
+    def __init__(self, env, num_episodes=10000):
+        self.env = env
+        self.Q = np.zeros([self.env.observation_space.n, self.env.action_space.n])
+        self.num_episodes = num_episodes
+        self.score = None
+        self.start = None
+        self.end = None
+            
+    def run(self):
+        self.start = datetime.now()
+        # ------------------------------------------------------------
+        # Run Q-learning algorithm, saving the rewards of each episode
+        # ------------------------------------------------------------
+        self.end = datetime.now()
+        self.score = sum(rewards)/self.num_episodes
+        
+    def dumps(self):
+        return dumps({'Q': self.Q, 'start': self.start, 'end': self.end, 'score': self.score, 'num_episodes': self.num_episodes})
+\end{lstlisting}
+\end{minipage}
+
+
+%----------------------------------------------------------------------------------------
+
+\section{MapReduce}
+\# TODO: Here I'll briefly describe the MapReduce setup to run all training (it was necessary to distribute computation to keep running time manageable)
 
 %----------------------------------------------------------------------------------------

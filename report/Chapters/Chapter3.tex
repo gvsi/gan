@@ -96,6 +96,7 @@ F & F & F & \cellcolor[HTML]{CE6301}H \\ \hline
 \end{table}
 
 \subsection{Motivation and shortcomings}
+\label{movationandshortcomings}
 \code{FrozenLake-v0} is generally classified as a straightforward reinforcement learning task. An optimal solution could be found by creating a model of the environment, that is merely recording where frozen tiles are while exploring the grid world. This is a \emph{model-based} approach to reinforcement learning, and it is perhaps less interesting than learning by exploration, without being biased by the particular configurations of the map.
 
 \emph{Model-free} algorithms, like Q-learning, need no accurate representation specific to the environment, and they are therefore more transferable to different configurations of the map or even to different tasks, which is the final objective of our project.
@@ -178,7 +179,7 @@ def is_valid(arr, r=0, c=0):
 \end{lstlisting}
 \end{minipage}
 
-So the \code{generate()} function returns a random frozen lake map represented as a list of strings. An example of an output is $["SFHH", "HFHH", "HFHH", "HFFG"]$. Each string in the list encodes a row configuration of the frozen lake.
+So the \code{generate()} function returns a valid random frozen lake map represented as a list of strings. An example of an output is $["SFHH", "HFHH", "HFHH", "HFFG"]$. Each string in the list encodes a row configuration of the frozen lake.
 
 What is left to do now, is to extend \code{FrozenLake-v0} so that we could pass in any map configuration, therefore exposing our randomly generate maps to the \code{gym} environment interface we described in earlier in section~\ref{openaigym}. Listing~\ref{lst:register} shows how to register a new environment by extending a pre-existing one.
 \\\\
@@ -199,7 +200,7 @@ register(
 \end{lstlisting}
 \end{minipage}
 
-Now to start doing simulations on our new environment we can just initialise it just like any other OpenAI Gym environment:
+Now, to start doing simulations on our new environment we can just initialise it just like any other OpenAI Gym environment:
 
 \begin{minipage}{\linewidth}
 \lstset{language=Python}
@@ -210,6 +211,6 @@ env = gym.make('RandomisedFrozenLake')
 \end{lstlisting}
 \end{minipage}
 
-We created a pull request to the OpenAI Gym's Github repository integrating this feature supporting random maps for \code{FrozenLake-v0}, so that developers and researchers could make use of these functionality \parencite{Addabili86:online}.
+We created a pull request to the OpenAI Gym's Github repository integrating this feature supporting random maps for \code{FrozenLake-v0}, so that developers and researchers could make use of these functionalities \parencite{Addabili86:online}.
 
 \label{ExtendedBaseline}
