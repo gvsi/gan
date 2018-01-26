@@ -99,13 +99,81 @@ F & F & F & \cellcolor[HTML]{CE6301}H \\ \hline
 
 \emph{Model-free} algorithms, like Q-learning, need no accurate representation specific to the environment, and they are therefore more transferable to different configurations of the map or even to different tasks, which is the final objective of our project.
 
-In fact, let's take the case of Q-learning applied to \code{FrozenLake-v0}: we do not need to have an explicit knowledge of the dynamics of each different tiles. We do not build a policy that explicitly favours movements towards frozen tiles or towards the goal. In fact, the agent does not have a model of what a frozen tile, or the goal tile or a hole are--it just learns by exploration that there it is rewarded when it gets to the goal state, and that is what it aims for implicitly.
+In fact, let's take the case of Q-learning applied to \code{FrozenLake-v0}: we do not need to have an explicit knowledge of the dynamics of each different tiles. We do not build a policy that explicitly favours movements towards frozen tiles or towards the goal. In fact, the agent does not have a model of what a frozen tile, or the goal tile or a hole are--it just learns by exploration that there it is rewarded when it gets to the goal state, and that is what it implicitly aims for.
 
 This is the sort of behaviour that we can transfer to different tasks--again our ultimate objective.
 \\\\
 In its current OpenAI Gym implementation \code{FrozenLake-v0} is a static map with the fixed configuration that is shown in figure~\ref{tab:FrozenLakev0}. There is currently no way to generate random configurations of the map, so we will be extending this implementation to account for that.
 
-Before we move on, let's contextualise this in the bigger picture as to not lose focus. Why do we need different configurations of the map, again? We want to train reinforcement learning models on different configurations so that we can have a distribution of policies over different maps which we can use as input to our GAN, thereby training a Generator network to spawn new policies for unseen configurations without having to find it through (computationally expensive) reinforcement learning algorithms!
-
 \section{Extended baseline: Randomised Frozen Lake}
+So we need to extend OpenAI Gym's implementation of \code{FrozenLake-v0} so that it can generate random configurations of the map.
+
+Before we move on, let us contextualise this in the bigger picture as to not lose focus. Why do we need different configurations of the map, again? We want to train reinforcement learning models on different configurations so that we can have a distribution of policies over different maps which we can use as input to our GAN. After training our GAN, we will have a Generator network spawning new policies for unseen configurations without having to find it through (computationally expensive) reinforcement learning algorithms!
+\\\\
+Listing~\ref{lst:generate} shows how we implemented the algorithm to generate random maps. 
+
+We can pass in the desired size of the map. By default, it will generate 4x4 grids like the one in \code{FrozenLake-v0}, but we could generate maps of arbitrary size, which will be result in higher task complexity, which we explore in Chapter~\ref{Chapter7}. We can also pass it the probability that a tile will be a frozen one. The presence of fewer frozen tiles, and therefore of more holes, makes the goal harder to achieve for the agent.
+
+\begin{minipage}{\linewidth}
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={Algorithm to generate random configurations}}
+\lstset{label={lst:generate}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+def generate(size=4, p=0.8):
+    valid_map = False
+    while not valid_map:
+        config = np.random.choice(['F','H'], (size, size), p=[p, 1-p])
+        config[0][0] = 'S'   # set top left to be the starting tile
+        config[-1][-1] = 'G' # set bottom right to be goal tile
+        valid_map = is_valid(config)
+        p *= 1.05            # increase probability of frozen tile
+    return ["".join(x) for x in config]
+\end{lstlisting}
+\end{minipage}
+
+Notice how the \code{generate} function in listing~\ref{lst:generate} only returns valid maps, that is maps that have at least one frozen path from start to goal. Surely, we could train models on environment configurations that are not solvable, but by using such constraint we limit the number of models we need to train by a significant amount.
+\\\\
+To check whether a map is solvable we use depth-first search from the start tile to the goal. If we find a path, that it is a valid map. Listing ~\ref{lst:is_valid} shows the algorithm:\\
+
+\begin{minipage}{\linewidth}
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={Depth-first search to check if a frozen lake map is valid}}
+\lstset{label={lst:is_valid}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+def is_valid(arr, r=0, c=0):
+    if arr[r][c] == 'G':
+        return True
+
+    tmp = arr[r][c]
+    arr[r][c] = "#" # temporary mark with '#' to remember visited tiles
+    
+    if r+1 < size and arr[r+1][c] not in '#H': # go down
+        if is_valid(arr, r+1, c) == True:
+            arr[r][c] = tmp
+            return True
+    
+    if c+1 < size and arr[r][c+1] not in '#H': # go right
+        if is_valid(arr, r, c+1) == True:
+            arr[r][c] = tmp
+            return True
+    
+    if r-1 >= 0 and arr[r-1][c] not in '#H': # go up
+        if is_valid(arr, r-1, c) == True:
+            arr[r][c] = tmp
+            return True
+    
+    if c-1 >= 0 and arr[r][c-1] not in '#H': # go left
+        if is_valid(arr,r, c-1) == True:
+            arr[r][c] = tmp
+            return True
+    arr[r][c] = tmp
+    return False
+\end{lstlisting}
+\end{minipage}
+
+
 \label{ExtendedBaseline}
