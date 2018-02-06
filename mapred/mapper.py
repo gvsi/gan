@@ -14,7 +14,6 @@ from math import sqrt
 import socket
 
 def verify(env, Q, num_episodes = 10000):
-    print("Running validation...")
     # Set learning parameters
     #create lists to contain total rewards and steps per episode
     #jList = []
@@ -42,7 +41,6 @@ def verify(env, Q, num_episodes = 10000):
             if d == True:
                 break
         rList.append(rAll)
-    print("Score over time: " +  str(sum(rList)/num_episodes))
     valid_score = sum(rList)/num_episodes
     try:
         avg_steps = jTot / successes
@@ -162,10 +160,10 @@ random.shuffle(lines)
 
 while lines:
     w = lines.pop()
-    if os.path.isfile("data/data4_valid/res/"+w+".txt"):
+    if os.path.isfile("../data/data4_valid/res/"+w+".txt"):
         continue
     else:
-        os.mknod("data/data4_valid/res/"+w+".txt")
+        os.mknod("../data/data4_valid/res/"+w+".txt")
         n = int(sqrt(len(w)))
         # split into lines
         map_str = [w[i:i+n] for i in range(0, len(w), n)]
@@ -173,6 +171,6 @@ while lines:
         exp = Experiment(env, num_episodes=10000)
         exp.run()
         exp.validate()
-        f = open("data/data4_valid/res/"+w+".txt","w+")
-        f.write(w+"\t" + str(exp.dumps()))
+        f = open("../data/data4_valid/res/"+w+".txt","w+")
+        f.write(w+"\t" + str(exp.dumps()) + "\n")
         f.close()
