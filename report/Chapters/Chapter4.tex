@@ -95,7 +95,7 @@ def validate(self):
 %----------------------------------------------------------------------------------------
 
 \section{Distributed Q-learning}
-Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 hours to run each experiment.
+Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 hours the whole set of experiments.
 
 To make this step of our pipeline faster and scalable to more data, we decide to set up a distributed processing on a cluster with multiple machines. More precisely, we set up a MapReduce framework \parencite{Dean:2004:MSD:1251254.1251264} implementation running on a Hadoop cluster \parencite{shvachko2010hadoop}.
 

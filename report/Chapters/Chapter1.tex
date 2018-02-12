@@ -3,8 +3,6 @@
 \chapter{Introduction} % Main chapter title
 \label{Chapter1} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 
-\# TODO:
-
 %----------------------------------------------------------------------------------------
 
 % Define some commands to keep the formatting separated from the content 
@@ -18,16 +16,42 @@
 
 \section{Motivation}
 \label{motivation}
+% - 
+% - Improve transferability of reinforcement learning domains
+% - Leverage power of neural networks to model and estimate complex systems
+% - 
 
-%----------------------------------------------------------------------------------------
+Reinforcement learning is the problem faced by an agent that must learn behaviour through trial-and-error interactions with an environment.
 
-\section{Structure of the report}
+Reinforcement learning as a field has had major successes in the past few years \parencite{tesauro1995temporal, singh2002optimizing, kohl2004policy, ng2006autonomous}, particularly as techniques utilising deep neural networks (DNN) have started permeating the research community. Techniques like Q-network \parencite{mnih2015human}, trust region policy optimisation \parencite{schulman2015trust}, and asynchronous advantage actor-critic (A3C) \parencite{mnih2016asynchronous} helped stemmed an area of research of recent significant importance: deep reinforcement learning (DRL) \parencite{DBLP:journals/corr/abs-1708-05866}.
 
+Traditional reinforcement learning approaches generally lacked scalability, limiting these techniques to fairly low-dimensional problems. These limitations are in terms of memory complexity and computational complexity \parencite{kaelbling1996reinforcement}.
+
+As such, using these usually becomes intractable when modelling real-world systems, due to the many variables and unknowns that are present in such systems \parencite{strehl2006pac}.
+
+As DRL methods rectified some of these issues, new ones started to emerge, particularly limitations inherent to using deep neural networks. Notably, the need to have access to large datasets for training, particularly if in the context of applications that require image processing, such as autonomous vehicle control \parencite{krizhevsky2012imagenet}, has proven to be a critical limitation. 
+
+In real-world reinforcement learning applications, environment observations often rely heavily on computer vision and image processing \parencite{berns1992reinforcement}, which often provide an incomplete picture of the state that the agent is in. In such types of scenario, formally known as partially observable Markov decision processes (POMDP) \parencite{monahan1982state}, not only do we have fragmentary observations, but it is also sometimes prohibitive to build large datasets that DRL requires to train the agent.
+
+In deep learning, one of the ways to circumvent this constraint is \emph{transfer learning}, the ability to leverage models trained in a particular domain on different applications. Transfer learning has proven pivotal in achieving successes in a wide variety of applications, without the need to train expensive models from scratch \parencite{pan2010survey}.
+
+There has been much work in improving transferability of reinforcement learning models, most notably multitask learning \parencite{caruana1998multitask} and curriculum learning \parencite{bengio2009curriculum}, though few methods have tried to bootstrap learning with the use of DNNs.
+
+There are few successes in transferring deep reinforcement learning across domains. Mostly notably, \cite{jaderberg2016reinforcement} introduced a technique to identify, in an unsupervised way, multiple pseudo-reward functions based on all training signals that the agent collected as observations. While doing deep reinforcement learning, therefore, \citeauthor{jaderberg2016reinforcement} would not only try to directly maximise the agent's cumulative reward, but also all the identified extrinsic rewards. There is a potential to use these identified extrinsic rewards in other domains, but this is a backwards way to tackle the problem of transferring behaviour. Here, we would first identify what auxiliary rewards the observations can give, to then reuse them on different task. Also, we have little to no control to guide the unsupervised exploration of auxiliary rewards functions towards a related task that we have the power to define. In fairness, \citeauthor{jaderberg2016reinforcement}, introduced auxiliary rewards as a way to speed up reinforcement learning on a single task, rather than aiming to transfer these to related tasks.
+
+In our work we provide a general framework that lets us speed up reinforcement learning on unseen tasks in related domains. We do this by training deep learning models over a distribution of optimal policies for different configurations of a task in a certain domain. More specifically, given a distribution of trained policies in variations of an environment, we train two models: a generative model that is able to generate policies for different configurations of a task in a domain, and a discriminative model that is able to tell whether a policy is a good one within this domain. We show how using these models while doing reinforcement learning can speed up learning on new unseen configurations.
+
+The generative model and the discriminative model are trained using deep neural networks in an adversarial architecture also know as a Generative Adversarial Network (GAN), introduced in \cite{goodfellow2014generative}'s seminal work. While this idea was popularised with applications in image synthesis, most notably Deep Convolutional Generative Adversarial Networks \parencite{radford2015unsupervised}, there have been successes using GANs within reinforcement learning.
+
+Specifically, work on generative adversarial imitation learning \parencite{ho2016generative} has shown remarkable speedups in the task of imitating behaviour given expert policies.
 
 %----------------------------------------------------------------------------------------
 
 \section{Data pipeline}
 
+%----------------------------------------------------------------------------------------
+
+\section{Structure of the report}
 
 %----------------------------------------------------------------------------------------
 
