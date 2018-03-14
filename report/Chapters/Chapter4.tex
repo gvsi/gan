@@ -95,9 +95,9 @@ def validate(self):
 %----------------------------------------------------------------------------------------
 
 \section{Distributed Q-learning}
-Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 hours the whole set of experiments.
+Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 hours to run the whole set of experiments.
 
-To make this step of our pipeline faster and scalable to more data, we decide to set up a distributed processing on a cluster with multiple machines. More precisely, we set up a MapReduce framework \parencite{Dean:2004:MSD:1251254.1251264} implementation running on a Hadoop cluster \parencite{shvachko2010hadoop}.
+To make this step of our pipeline faster and scalable to more data, we decide to set up a distributed processing on a cluster with multiple machines. More precisely, we set up a MapReduce framework \parencite{Dean:2004:MSD:1251254.1251264} implementation running on an Hadoop cluster \parencite{shvachko2010hadoop}.
 
 A MapReduce program is composed of a Map procedure that takes in some (large) input and performs a particular operation whose output is then fed into another Reduce procedure, which outputs the final result. The power of MapReduce is that the framework orchestrates the processing of these procedures by marshalling the distributed servers, running the various tasks in parallel, managing all communications and data transfers between the various parts of the system, and providing for redundancy and fault tolerance.
 
@@ -105,7 +105,7 @@ Figure~\ref{fig:MapReduce} shows the distributed architecture to train multiple 
 
 Each experiment's result is then written on an output file by the reducer. Each line will be again a key-value pair, with the map configuration string as key and the \code{Experiment} result dumped in string format. In our following sections, we can just parsing and load these results to conduct our further analysis.
 
-While this particular architecture does not make full use of the power of MapReduce (combining, partitioning and sorting), it is an optimal and convenient pipeline to distribute our computations across a cluster of machines, thereby drastically reducing our training time.
+While this particular architecture does not make full use of the power of MapReduce (combining, partitioning and sorting), it is an optimal and convenient pipeline to distribute our computations across a cluster of machines, thereby drastically reducing the training time of the whole experiment set.
 \begin{figure}
 \centering
 \includegraphics[width=10cm]{Figures/MapReduce}
