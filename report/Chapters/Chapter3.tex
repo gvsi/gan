@@ -108,6 +108,7 @@ This is the sort of behaviour that we can transfer to different tasks--again our
 In its current OpenAI Gym implementation, \code{FrozenLake-v0} is a static map with the fixed configuration that is shown in figure~\ref{tab:FrozenLakev0}. There is currently no way to generate random configurations of the map, so next up, we will be extending this implementation to account for that.
 
 \section{Extended baseline: Randomised Frozen Lake}
+\label{ExtendedBaseline}
 So we need to extend OpenAI Gym's implementation of \code{FrozenLake-v0} so that it can generate random configurations of the map.
 
 Before we move on, let us contextualise this in the bigger picture as to not lose focus of what we are trying to achieve. Why do we need different configurations of the map, again? We want to train reinforcement learning models on different configurations so that we can have a distribution of policies over different maps which we can use as input to our GAN. After training our GAN, we will have a Generator network spawning new policies for unseen configurations without having to find it through (computationally expensive) reinforcement learning algorithms!
@@ -213,4 +214,71 @@ env = gym.make('RandomisedFrozenLake')
 
 We created a pull request to the OpenAI Gym's Github repository integrating this feature supporting random maps for \code{FrozenLake-v0}, so that developers and researchers could make use of these functionalities \parencite{Addabili86:online}.
 
-\label{ExtendedBaseline}
+\subsection{Adjusting the reward system}
+\label{sec:adjrewardsys}
+The vanilla OpenAI Gym implementation of \code{FrozenLake-v0} has sparse rewards, meaning that the agent is rewarded a value of 1 if it reaches the goal, and a value of 0 if it falls into a hole.
+
+The problem with this system of rewards is the fact that it does not take into account the number of timesteps that it takes the agent to solve the task.
+
+Consider the three paths shown in figure~\ref{fig:FrozenLakePaths}. All three paths would yield a final reward of 1 in the OpenAI Gym's implementation. But intuitively, in a real-world scenario, we'd like to have a path-finding robot that is able to navigate the environment with as few actions as possible.
+
+More generally, reinforcement learning environments have rewards that are inversely proportional to the number of steps that it takes the agent to solve \citep{bellemare2013arcade, 1606.01540, zamora2016extending}
+
+We wish to leverage this alternative reward system to train agents that can therefore reach the goal state as quickly as possible.
+
+In terms of extending our \code{RandommiseFrozenLake} implementation, we can just update the final reward as 
+
+\[
+r =
+\left\{
+	\begin{array}{ll}
+		0   & \mbox{if agent fell into a hole}\\
+		6/t & \mbox{if agent reaches goal state}
+	\end{array}
+\right.
+\]
+
+where $t$ is the number of timesteps needed to reach the goal state.
+
+If the agent reaches the goal state in the minimum number of timesteps (6), the reward would be 1, otherwise we add a penalty for any additional timestep required.
+
+The rewards of each path in figure~\ref{fig:FrozenLakePaths} will therefore be, from left to right, $r=1$, $r=1$ and $r=6/14=0.43$.
+
+In section~\ref{sec:analysisresults} and \ref{sec:transferableknowledge}, we will show how this reward system (favouring paths that are shorter) will help us define the type transferable knowledge that we wish to transfer across tasks.
+
+\begin{figure}[h]
+\vskip 2mm
+\centering{
+\subfigure[Optimal path to goal tile]{
+\includegraphics[width=0.27\columnwidth]{Figures/FrozenLakePath1}}
+\hskip 0.3cm
+\subfigure[Another optimal path to goal tile]{
+\includegraphics[width=0.27\columnwidth]{Figures/FrozenLakePath2}}
+\hskip 0.3cm
+\subfigure[Non-optimal path to goal tile]{
+\includegraphics[width=0.27\columnwidth]{Figures/FrozenLakePath3}}
+
+}
+\caption{Different paths to the  goal tile}
+\label{fig:FrozenLakePaths}
+\vskip -2mm
+\end{figure}
+
+
+%\begin{figure*}[t!]
+%    \centering
+%    \begin{subfigure}[t]{0.5\textwidth}
+%        \centering
+%        \includegraphics[height=1.2in]{Figures/FrozenLakePath1}
+%        \caption{Lorem ipsum}
+%    \end{subfigure}%
+%    ~ 
+%    \begin{subfigure}[t]{0.5\textwidth}
+%        \centering
+%        \includegraphics[height=1.2in]{Figures/FrozenLakePath2}
+%        \caption{Lorem ipsum, lorem ipsum,Lorem ipsum, lorem ipsum,Lorem ipsum}
+%    \end{subfigure}
+%    \caption{Caption place holder}
+%\end{figure*}
+%
+%
