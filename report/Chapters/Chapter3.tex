@@ -101,7 +101,7 @@ F & F & F & \cellcolor[HTML]{CE6301}H \\ \hline
 
 \emph{Model-free} algorithms, like Q-learning, need no accurate representation specific to the environment, and they are therefore more transferable to different configurations of the map or even to different tasks, which is the final objective of our project.
 
-In fact, let's take the case of Q-learning applied to \code{FrozenLake-v0}: we do not need to have an explicit knowledge of the dynamics of each different tiles. We do not build a policy that explicitly favours movements towards frozen tiles or towards the goal. In fact, the agent does not have a model of what a frozen tile is, nor a model of the goal tile or a hole--it just learns by exploration that there it is rewarded when it gets to the goal state, and that is what it implicitly aims for.
+In fact, let's take the case of Q-learning applied to \code{FrozenLake-v0}: we do not need to have an explicit knowledge of the dynamics of each different tiles. We do not build a policy that explicitly favours movements towards frozen tiles or towards the goal. In fact, the agent does not have a model of what a frozen tile is, nor a model of the goal tile or a hole--it just learns by exploration that it is rewarded when it gets to the goal state, and that is what it implicitly aims for.
 
 This is the sort of behaviour that we can transfer to different tasks--again our ultimate objective.
 \\\\
@@ -109,7 +109,7 @@ In its current OpenAI Gym implementation, \code{FrozenLake-v0} is a static map w
 
 \section{Extended baseline: Randomised Frozen Lake}
 \label{ExtendedBaseline}
-So we need to extend OpenAI Gym's implementation of \code{FrozenLake-v0} so that it can generate random configurations of the map.
+We would like to to extend OpenAI Gym's implementation of \code{FrozenLake-v0} so that it can generate random configurations of the map.
 
 Before we move on, let us contextualise this in the bigger picture as to not lose focus of what we are trying to achieve. Why do we need different configurations of the map, again? We want to train reinforcement learning models on different configurations so that we can have a distribution of policies over different maps which we can use as input to our GAN. After training our GAN, we will have a Generator network spawning new policies for unseen configurations without having to find it through (computationally expensive) reinforcement learning algorithms!
 \\\\
@@ -140,7 +140,7 @@ def generate(size=4, p=0.8):
 
 Notice how the \code{generate()} function in listing~\ref{lst:generate} only returns valid maps, that is, maps that have at least one frozen path from start to goal. Surely, we could train models on environment configurations that are not solvable. Q-learning, for example, would just return a \code{Q} matrix with all Q-values equals to $0$, since the agent will never get to the goal tile and get its reward. If it is unclear why, refer to the Q-learning subsection~\ref{qlearning}.
 
-Using such constraint on map validity, we can limit the number of models we need to train by a significant amount, therefore reducing training time.
+Using such constraint on map validity, we can limit the number of models we need to train by a significant amount, therefore reducing training time. For the 4x4 grid, rather than having $2^{(16-2)}=2^{14}=16,384$ possible configurations, we can reduce it to only 3,827 possible valid map configurations.
 \\\\
 To check whether a map is solvable we use depth-first search from the start tile to the goal. If there is such path, then it is a valid map. Listing ~\ref{lst:is_valid} shows the algorithm:\\
 
@@ -182,7 +182,7 @@ def is_valid(arr, r=0, c=0):
 
 So the \code{generate()} function returns a valid random frozen lake map represented as a list of strings. An example of an output is $["SFHH", "HFHH", "HFHH", "HFFG"]$. Each string in the list encodes a row configuration of the frozen lake.
 
-What is left to do now, is to extend \code{FrozenLake-v0} so that we could pass in any map configuration, therefore exposing our randomly generate maps to the \code{gym} environment interface we described in earlier in section~\ref{openaigym}. Listing~\ref{lst:register} shows how to register a new environment by extending a pre-existing one.
+What is left to do now, is to extend \code{FrozenLake-v0} so that we could pass in any map configuration, therefore exposing our randomly generated maps to the \code{gym} environment interface described earlier in section~\ref{openaigym}. Listing~\ref{lst:register} shows how to register a new environment by extending a pre-existing one.
 \\\\
 \begin{minipage}{\linewidth}
 \lstset{language=Python}
@@ -201,7 +201,7 @@ register(
 \end{lstlisting}
 \end{minipage}
 
-Now, to start doing simulations on our new environment we can just initialise it just like any other OpenAI Gym environment:
+Now, to start doing simulations on our new environment we can initialise it just like any other OpenAI Gym environment:
 
 \begin{minipage}{\linewidth}
 \lstset{language=Python}
