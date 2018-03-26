@@ -69,7 +69,7 @@ class Experiment(object):
         print("Score over time: " +  str(self.score))
 
     def run(self):
-        print("Running experiment...")
+        # print("Running experiment...")
         if self.done:
             print("Already done running")
             return
@@ -159,18 +159,26 @@ for line in sys.stdin:
 random.shuffle(lines)
 
 while lines:
+    set_name = "data4_valid_mul5_2000"
     w = lines.pop()
-    if os.path.isfile("../data/data4_valid/res/"+w+".txt"):
+    print("Running: " + w)
+    if os.path.isfile("../data/"+set_name+"/res/"+w+".txt"):
         continue
     else:
-        os.mknod("../data/data4_valid/res/"+w+".txt")
+        os.mknod("../data/"+set_name+"/res/"+w+".txt")
         n = int(sqrt(len(w)))
         # split into lines
         map_str = [w[i:i+n] for i in range(0, len(w), n)]
         env = new_env(map_str, slippery=True)
-        exp = Experiment(env, num_episodes=10000)
+        exp = Experiment(env, num_episodes=2000)
         exp.run()
+        for _ in range(5):
+            new_exp = Experiment(env, num_episodes=2000)
+            new_exp.run()
+            if new_exp.score > exp.score:
+                exp = new_exp
+        print("Validating...")
         exp.validate()
-        f = open("../data/data4_valid/res/"+w+".txt","w+")
+        f = open("../data/"+set_name+"/res/"+w+".txt","w+")
         f.write(w+"\t" + str(exp.dumps()) + "\n")
         f.close()
