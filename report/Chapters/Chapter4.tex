@@ -95,17 +95,17 @@ def validate(self):
 %----------------------------------------------------------------------------------------
 
 \section{Distributed Q-learning}
-Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 hours the whole set of experiments.
+Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3,827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 CPU hours to run the whole set of experiments.
 
-To make this step of our pipeline faster and scalable to more data, we decide to set up a distributed processing on a cluster with multiple machines. More precisely, we set up a MapReduce framework \parencite{Dean:2004:MSD:1251254.1251264} implementation running on a Hadoop cluster \parencite{shvachko2010hadoop}.
+To make this step of our pipeline faster and scalable to more data, we decide to set up a distributed processing on a cluster with multiple machines. More precisely, we set up a MapReduce framework \parencite{Dean:2004:MSD:1251254.1251264} implementation running on an Hadoop cluster \parencite{shvachko2010hadoop} of 25 machines.
 
 A MapReduce program is composed of a Map procedure that takes in some (large) input and performs a particular operation whose output is then fed into another Reduce procedure, which outputs the final result. The power of MapReduce is that the framework orchestrates the processing of these procedures by marshalling the distributed servers, running the various tasks in parallel, managing all communications and data transfers between the various parts of the system, and providing for redundancy and fault tolerance.
 
 Figure~\ref{fig:MapReduce} shows the distributed architecture to train multiple Q-learning instances. The input to the system is a list of strings, each representing the map configuration of a \code{RandomisedFrozenLake}, e.g. $"SFHHHFHHHFHHHFFG"$. These inputs are fed into Mapper programs running on different machines. The mapper's task is to initialise the experiment and run Q-learning on the environment. It outputs a key-value pair, where the key is the string that uniquely identifies a map configuration, and the output is the \code{Experiment} object that encapsulates the already trained Q-table. We have yet to assign a validation score to this table we trained, and that's the job of the reducer.
 
-Each experiment's result is then written on an output file by the reducer. Each line will be again a key-value pair, with the map configuration string as key and the \code{Experiment} result dumped in string format. In our following sections, we can just parsing and load these results to conduct our further analysis.
+Each experiment's result is then written to an output file by the reducer. Each line will be again a key-value pair, with the map configuration string as key and the \code{Experiment} result dumped in string format. In the following sections, we can just parse and load these results to conduct our further analysis.
 
-While this particular architecture does not make full use of the power of MapReduce (combining, partitioning and sorting), it is an optimal and convenient pipeline to distribute our computations across a cluster of machines, thereby drastically reducing our training time.
+While this particular architecture does not make full use of the power of MapReduce (combining, partitioning and sorting), it is an optimal and convenient pipeline to distribute our computations across a cluster of machines, thereby drastically reducing the training time of the whole experiment set.
 \begin{figure}
 \centering
 \includegraphics[width=10cm]{Figures/MapReduce}
@@ -113,4 +113,30 @@ While this particular architecture does not make full use of the power of MapRed
 \label{fig:MapReduce}
 \end{figure}
 
+\section{Analysis of results}
+\label{sec:analysisresults}
+In this section we report some statistics on the data we just trained. This analysis will be useful when we perform our final benchmarking.
+
+Figure~\ref{fig:Qvalues} shows the average intensity values of the Q-tables in the training test.
+
+We notice that the utility values in the second and third columns are, in most cases, the highest values at each row. We interpret this as our models favouring, on average, the action of going south (second column) and east (third column) over going west or north.
+
+Indeed, according to the reward system that we described in section~\ref{sec:adjrewardsys}, our trained models will try and reach the goal state with as few actions as possible. This validates why on average, the best actions to make at each state will be going south or going east.
+% Plot rewards plot with std
+% Define acceptable line and when it is achieved
+
+\begin{figure}
+\centering
+\includegraphics[width=3cm]{Figures/Qtable_mean}
+\caption{Schematic of distributed Q-learning with validation on MapReduce}
+\label{fig:Qvalues}
+\end{figure}
+
+\section{Transferable knowledge}
+\label{sec:transferableknowledge}
+%TODO: Finish transferable knowledge
+Before proceeding, we need to start a discussion on the type of knowledge that we wish or we expect to be transferred. Having transferred knowledge is what will allow us to speed up training time on unseen tasks.
+
+By using Q-learning to train policies on \code{RandomisedFrozenLake}, we effectively train agents to go from the top-left corner to the bottom-right corner.
+In section~\ref{sec:adjrewardsys} we adjusted the rewards to 
 %----------------------------------------------------------------------------------------

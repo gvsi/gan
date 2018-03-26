@@ -45,16 +45,58 @@ The generative model and the discriminative model are trained using deep neural 
 
 Specifically, work on generative adversarial imitation learning \parencite{ho2016generative} has shown remarkable speedups in the task of imitating behaviour given expert policies.
 
+\section{Goal}
+\label{goal}
+Given all these motivations, we can now define the \textbf{final goal of our work}: \\
+
+\begin{addmargin}[3em]{3em}
+\emph{Transferring knowledge} obtained with reinforcement learning techniques on certain tasks to similar, unseen tasks, by \emph{leveraging the power of Generative Adversarial Networks} (GANs). In this way, we hope to \emph{achieve shorter training times} and \emph{better rewards} when training models \emph{for these unseen tasks}.
+\end{addmargin}
+
 %----------------------------------------------------------------------------------------
 
 \section{Data pipeline}
+\label{sec:datapipeline}
+In this section we provide a bird's eye view to the whole project by showing a visual schematic of the data pipeline (Figure~\ref{fig:pipeline})
+
+We will be referencing this pipeline schematic throughout the whole report. In fact, as we dive deeper into technical details of each component of the data pipeline, it is critical to take them in the context of the whole pipeline as to justify certain design decisions we make for our experiments.
+
+At this point, it is important to highlight how we achieve the goal we set in the previous subsection (subsection~\ref{goal}) with this data pipeline.
+
+The input to our system is a set of similar tasks that would be traditionally solved with reinforcement learning techniques. What makes these tasks similar is the fact that they where the goal is the same, but the agent operates in different map configurations. We provide more details on the environment in Chapter~\ref{Chapter3}.
+We split these tasks into a test set and a training set. We train all of these maps configurations with Q-learning, a reinforcement learning technique to obtain optimal policies. 
+
+Now, what we want to achieve, as per our goal, is:
+\begin{enumerate}
+	\item train a GAN system to capture the distribution of the policies in the training set,
+	\item use the trained GAN to develop a new algorithm that is able to transfer that knowledge to speed up training of tasks in the test set of map configurations,
+	\item verify and benchmark that the test policies obtained with the new method are better than the ones trained with traditional Q-learning.
+\end{enumerate}
+
+\begin{figure}
+\centering
+\includegraphics[width=10cm]{Figures/Pipeline}
+\caption{The Data Pipeline}
+\label{fig:pipeline}
+\end{figure}
 
 %----------------------------------------------------------------------------------------
 
 \section{Structure of the report}
+Our report is structured in a what that strongly follows each component of the data pipeline outlined in the previous subsection.
+\begin{itemize}
+	\item Chapter~\ref{Chapter2} introduces important background information on reinforcement learning, Markov Decision Processes, Q-learning and Generative Adversarial Networks.
+	\item Chapter~\ref{Chapter3} details the environment being used in our experiments.
+	\item Chapter~\ref{Chapter4} reports on the process of training policies on all the different tasks with traditional reinforcement learning (Q-learning).
+	\item Chapter~\ref{Chapter5} outlines the process of training the GAN given the trained policies in the training set.
+	\item Chapter~\ref{Chapter6} describes the new algorithm we develop to speed up learning on unseen tasks.
+	\item Chapter
+\end{itemize}
 
 %----------------------------------------------------------------------------------------
 
 \section{Main contributions}
+% TODO:
+
 
 %----------------------------------------------------------------------------------------
