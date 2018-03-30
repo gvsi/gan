@@ -44,6 +44,8 @@ Q-learning lets us learn the \emph{quality}, or expected utility, for each state
 
 More formally, we estimate a function $Q: S \times A \to \mathbb{R}$. We can model $Q$ as a mapping table (initialised with some uniform values), whose value we update at each time step of our simulations.
 
+% TODO Pseudocode for Q-learning
+
 Here's how we update our Q-table at each time step $t$:
   \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
   \underbrace{\alpha}_{\rm learning~rate} \times \left[
@@ -78,6 +80,7 @@ An important theme in reinforcement learning, and that we heavily focus our atte
 
 \subsection{Deep Reinforcement Learning}
 \subsubsection{DQN}
+% Add DQN
 \subsection{Problems with reinforcement learning techniques}
 \subsection{Actor critic}
 
@@ -131,11 +134,55 @@ The cost function for the whole system would look like the following minimax gam
 \subsection{Successes}
 \label{successes}
 \subsubsection{DCGAN}
+% TODO: DCGAN
+
 \subsection{Conditional GANs}
 
 %----------------------------------------------------------------------------------------
 
-\section{Existing related work}
+\section{Related work}
 \subsection{Generative Adversarial Imitation Learning}
+
+An analogous way to do transfer learning in the context of reinforcement learning imitation learning, an important subfield of research in the reinforcement learning community. Imitation learning, as the name suggests, mostly deals with training agents that imitate an expert behaviour. 
+
+It does so by taking signals coming in from experts, usually encoded human behaviour. Having such signals can significantly decrease training time, as well as provide new insight onto different optimal behaviour that could achieve better rewards. Most notably, researchers at OpenAI used signals from professional Go players to build imitation learning techniques \citep{silver2016mastering}. This was only used as a priming step to learning the game of Go, and was used in combination with Deep Q-networks.
+
+Generally, the imitating agent is trained on the same environment as the expert agent. Thus, imitation learning, while still being a form of knowledge transfer, only relates to techniques that do not cross task domains.
+
+Despite this crucial difference with what the goal of our project, a particular technique that has been recently introduced for imitation learning is still very much related to some of the components of our pipeline.
+
+Generative Adversarial Imitation Learning \citep{ho2016generative} or GAIL bases much of its architecture on GANs.
+
+\citeauthor{ho2016generative} from OpenAI introduced it as a better-performing alternative to imitation learning techniques. In particular, they motivated their work on the computational cost of a typical approach to imitation learning, which does not directly train a policy that is imitating an expert.
+In fact, one way to do imitation learning was to use inverse reinforcement learning on the expert policy to obtain its reward function. Based on this reward function, reinforcement learning techniques could be used to train imitating agent. Given this pipeline, we can notice that it is an indirect way of conducting imitation learning, which is prone to produce a model that does not accurately represent the distribution of trajectories of the agent.
+
+With GAIL there is no need to extract a reward function, but they let the Generative Adversarial Network capture the distribution of observations and action pairs. After training the GAN, the Generator will have been trained to produce appropriate actions, given observations. The real data that the GAN is trained with are trajectories coming in from the expert policy. Algorithm~\ref{alg:gail} also shows a simplified algorithm for GAIL.
+
+In figure~\ref{fig:GAIL-GAN} we present a schematic of each component involved in training a Generative Adversarial Network for Imitation Learning. We notice right away that the GAIL architecture closely resembles the Vanilla GAN, as we showed in figure~\ref{fig:VanillaGAN}. After training, the Generator will represent the imitating policy, which will hopefully perform as well as the expert policy. Again, there is no need to extract a reward function in this whole pipeline.
+
+In this work, \citeauthor{ho2016generative} have shown groundbreaking results in imitation learning using GANs, as they achieved much better performances with traditional imitation learning techniques like Behavioural Cloning or Dataset Aggregation.
+
+In our work, we aim to achieve as great results in transferring knowledge across domains.
+
+\begin{algorithm}[tb]
+    \caption{Generative adversarial imitation learning}
+    \label{alg:gail}
+    \begin{algorithmic}[1]
+       \STATE {\bfseries Input:} Expert trajectories $\tau_E \sim \pi_E$, initial policy and discriminator parameters $\theta_0, w_0$
+       \FOR{$i = 0, 1, 2, \dotsc$}
+           \STATE Sample trajectories $\tau_i \sim \pi_{\theta_i}$
+           \STATE Update the discriminator parameters from $w_i$ to $w_{i+1}$ with the gradient
+           \STATE Take a policy step from $\theta_i$ to $\theta_{i+1}$, using the TRPO/PPO rule.
+       \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{figure*}
+\centering
+\includegraphics[width=15cm]{Figures/GAIL-GAN}
+\caption{Generative Adversarial Imitation Learning (GAIL) architecture}
+\label{fig:GAIL-GAN}
+\end{figure*}
+
 
 %----------------------------------------------------------------------------------------
