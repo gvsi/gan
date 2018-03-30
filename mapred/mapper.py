@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/afs/inf.ed.ac.uk/user/s14/s1448512/miniconda3/envs/gan/bin/python
 
 import os
 import sys
@@ -12,6 +12,8 @@ from json_tricks import dumps, loads
 from tqdm import tqdm
 from math import sqrt
 import socket
+from baselines import bench, logger
+from shutil import copyfile, move
 
 def verify(env, Q, num_episodes = 10000):
     # Set learning parameters
@@ -117,6 +119,7 @@ class Experiment(object):
 
     def validate(self):
         valid_score, avg_steps = verify(self.env, self.Q)
+        #valid_score, avg_steps = verify(self.env.env, self.Q)
         self.valid_score = valid_score
         self.valid_avg_steps = avg_steps
 
@@ -159,7 +162,7 @@ for line in sys.stdin:
 random.shuffle(lines)
 
 while lines:
-    set_name = "data4_valid_mul5_2000"
+    set_name = "data4_monitor_10000x5"
     w = lines.pop()
     print("Running: " + w)
     if os.path.isfile("../data/"+set_name+"/res/"+w+".txt"):
@@ -170,13 +173,21 @@ while lines:
         # split into lines
         map_str = [w[i:i+n] for i in range(0, len(w), n)]
         env = new_env(map_str, slippery=True)
-        exp = Experiment(env, num_episodes=2000)
+        env = bench.Monitor(env, "../data/"+set_name+"/logs/" + w)
+        exp = Experiment(env, num_episodes=10000)
         exp.run()
-        for _ in range(5):
-            new_exp = Experiment(env, num_episodes=2000)
+        repeats = 5 # 5
+        copyfile("../data/"+set_name+"/logs/" + w + ".monitor.csv", "../data/"+set_name+"/logs/best_" + w + ".monitor.csv")
+        for _ in range(repeats):
+            new_exp = Experiment(env, num_episodes=10000)
             new_exp.run()
             if new_exp.score > exp.score:
+                copyfile("../data/"+set_name+"/logs/" + w + ".monitor.csv", "../data/"+set_name+"/logs/best_" + w + ".monitor.csv")
                 exp = new_exp
+        # Only keep best
+        os.remove("../data/"+set_name+"/logs/" + w + ".monitor.csv")
+        move("../data/"+set_name+"/logs/best_" + w + ".monitor.csv", "../data/"+set_name+"/logs/" + w + ".monitor.csv")
+
         print("Validating...")
         exp.validate()
         f = open("../data/"+set_name+"/res/"+w+".txt","w+")
