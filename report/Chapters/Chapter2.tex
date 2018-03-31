@@ -55,18 +55,18 @@ Here's how we update our Q-table at each time step $t$:
     \underbrace{Q(s_t,a_t)}_{\rm old~value} \right] \]
 
 % TODO: Clean this up    
-\[Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q_{t})}_{\rm gradient~of~D~at~Q_{t}}\]
-
-  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
-  \underbrace{\alpha}_{\rm learning~rate} \times \left[
-    \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
-        discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
-        estimate~of~optimal~future~value}}^{\rm learned~value} -
-    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
-    
-    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
-   
-   \[\frac{\sum_{i}^{test~set} valid\_score(Q_i) - valid\_score(Q_i')}{\#(test~set)}\]
+%\[Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q_{t})}_{\rm gradient~of~D~at~Q_{t}}\]
+%
+%  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
+%  \underbrace{\alpha}_{\rm learning~rate} \times \left[
+%    \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
+%        discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
+%        estimate~of~optimal~future~value}}^{\rm learned~value} -
+%    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
+%    
+%    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
+%   
+%   \[\frac{\sum_{i}^{test~set} valid\_score(Q_i) - valid\_score(Q_i')}{\#(test~set)}\]
 where:
 \begin{itemize}
 	\item $\alpha\in[0,1]$ is the \emph{learning rate}, a coefficient that regulates how much the newly learned values will contribute in the update

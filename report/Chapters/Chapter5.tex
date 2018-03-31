@@ -168,7 +168,7 @@ With both RMSProp and Adam, we obtain a much better convergence compared to vani
 After optimising our hyperparameters with grid-search, our final optimal optimisation algorithm is the following: \\
 Adam, step size $\epsilon = 0.0002$, exponential decay rates $\rho_1 = 0.5$, $\rho_2 = 0.999$.
 
-%TODO Comparisons of design decisions
+%TODO Comparisons of design decisions graphs
 
 
 %----------------------------------------------------------------------------------------
@@ -284,6 +284,8 @@ where $\gamma$ and $\beta$ are parameters updated with gradient descent that wil
 We trained two different models for both the Generator and the Discriminator models: one with Batch Normalisation and one without, keeping the rest of the architecture and hyperparameter settings fixed.
 Using Batch Normalisation in the Generator network leads to much faster convergence than the model that does not make use of it.
 The Discriminator network, effectively being a much less complex model than the Generator, did not benefit from batch-normalised inputs in terms of speed of model convergence and overall cost.
+
+%TODO: Couple of words on task generalisation + move architectures here
 
 \section{Verification}
 %TODO: Verification section
