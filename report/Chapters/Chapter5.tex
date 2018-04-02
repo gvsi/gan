@@ -26,67 +26,22 @@ Given \code{D}'s prediction, we then apply a gradient-based optimisation method 
 
 Building neural net architecture that work well in practice generally involves finding and tuning many parameters and making several design decisions that make the issue not trivial. In the following subsections, we introduce such decisions and hyperparameters choice with the aim of allowing reproducibility of our results.
 
-We report here the architectures of final optimal deep neural networks for the Generator model and the Discriminator model. Figure~\ref{fig:Generator} and figure~\ref{fig:Discriminator} show a visualisation for the two networks respectively.\\\\
-\textbf{Generator}:
-\begin{itemize}[noitemsep]
-	\item Input: 100 dim
-	\item Hidden Layer 1: 256 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: LeakyReLu(alpha = 0.2)
-		\item BatchNormalisation(momentum = 0.8)
-	\end{itemize}
-	\item Hidden Layer 2: 512 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: LeakyReLu(alpha = 0.2)
-		\item BatchNormalisation(momentum = 0.8)
-	\end{itemize}
-		\item Hidden Layer 3: 1024 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: LeakyReLu(alpha = 0.2)
-		\item BatchNormalisation(momentum = 0.8)
-	\end{itemize}
-	\item Output Layer: 64 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: tanh
-	\end{itemize}
-\end{itemize}
-\phantom\\
-\textbf{Discriminator}:
-\begin{itemize}[noitemsep]
-	\item Input: 64 dim
-	\item Hidden Layer 1: 512 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: LeakyReLu(alpha = 0.2)
-	\end{itemize}
-	\item Hidden Layer 2: 256 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: LeakyReLu(alpha = 0.2)
-	\end{itemize}
-	\item Output Layer: 1 dim
-	\begin{itemize}[noitemsep,topsep=0pt]
-		\item Activation: sigmoid
-	\end{itemize}
-\end{itemize}
-
 As we can notice, the Generator network outputs a vector of size dimension 64, which we can then reshape to a 16x4 matrix. This is our 'fake', generated Q-table. Its input is just a the latent space vector $z$ of size 100 whose values we can set randomly. We can interpret $z$ as a noise vector which deterministically influences the Q-table that we generate. While we can vary $z$ and obtain different Q-tables, these generated Q-tables should still fall within the initial distributions of Q-tables we have in our dataset, provided that the Generator was trained properly.
 
 The Discriminator network, in turn, takes in an input a vector of size 64 (which is a reshaped 16x4 Q-table), and outputs a single scalar in $[0,1]$ representing the predicted probability that the inputted Q-table is a generated policy or one sampled from the dataset.
+
 
 \begin{figure}
 \centering
 \includegraphics[width=15cm]{Figures/Generator}
 \caption{Architecture of the Generator network}
 \label{fig:Generator}
-\end{figure}
 
-\begin{figure}
-\centering
 \includegraphics[width=10cm]{Figures/Discriminator}
 \caption{Architecture of the Discriminator network}
 \label{fig:Discriminator}
 \end{figure}
 
-%TODO Graph losses Generator Discriminator
 
 \begin{figure}
 \centering
@@ -285,7 +240,66 @@ We trained two different models for both the Generator and the Discriminator mod
 Using Batch Normalisation in the Generator network leads to much faster convergence than the model that does not make use of it.
 The Discriminator network, effectively being a much less complex model than the Generator, did not benefit from batch-normalised inputs in terms of speed of model convergence and overall cost.
 
+\section{Final architecture and results}
 %TODO: Couple of words on task generalisation + move architectures here
+We report here the architectures of final optimal deep neural networks for the Generator model and the Discriminator model. Figure~\ref{fig:Generator} and figure~\ref{fig:Discriminator} show a visualisation for the two networks respectively.\\\\
+\textbf{Generator}:
+\begin{itemize}[noitemsep]
+	\item Input: 100 dim
+	\item Hidden Layer 1: 256 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: LeakyReLu(alpha = 0.2)
+		\item BatchNormalisation(momentum = 0.8)
+	\end{itemize}
+	\item Hidden Layer 2: 512 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: LeakyReLu(alpha = 0.2)
+		\item BatchNormalisation(momentum = 0.8)
+	\end{itemize}
+		\item Hidden Layer 3: 1024 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: LeakyReLu(alpha = 0.2)
+		\item BatchNormalisation(momentum = 0.8)
+	\end{itemize}
+	\item Output Layer: 64 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: tanh
+	\end{itemize}
+\end{itemize}
+\phantom\\
+\textbf{Discriminator}:
+\begin{itemize}[noitemsep]
+	\item Input: 64 dim
+	\item Hidden Layer 1: 512 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: LeakyReLu(alpha = 0.2)
+	\end{itemize}
+	\item Hidden Layer 2: 256 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: LeakyReLu(alpha = 0.2)
+	\end{itemize}
+	\item Output Layer: 1 dim
+	\begin{itemize}[noitemsep,topsep=0pt]
+		\item Activation: sigmoid
+	\end{itemize}
+\end{itemize}
+
+Let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as typical with gradient-based optimisations), we also provide on the right, a smoothed version with IIR filtering. We notice that both  converge after around 1,000 epochs of training.
+
+Initially, observing the Discriminator's loss (blue) it appears that the neural network was perfectly trained, as its loss was hovering just around 0. That is due to the fact that the Generator was not properly trained yet (notice the high losses), as was producing garbage policies that the Discriminator was easily able to discern.
+
+However, as we train the Generator a few more epochs, the policies that it produces tend to fit the initial distribution of policies more, which make the Discriminator loss increase slightly. Both then converge after a few more epochs.
+
+It takes the Generator more epochs to train since it is a neural network with much higher complexity (one additional hidden layer, and more hidden units). This explains the trend of both losses.
+
+\begin{figure}
+\centering
+\includegraphics[width=15cm]{Figures/GAN_losses}
+\caption{Generator and Discriminator losses over number of epochs}
+\label{fig:GANLosses}
+\end{figure}
+
+
 
 \section{Verification}
 It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that it was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
@@ -316,28 +330,28 @@ In comparison, sampling 1,000 random 16x4 matrices and using them as policies on
 \vskip 2mm
 \centering{
 \subfigure[\textbf{Epoch 0}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/000}}
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/0000}}
 \hskip 2cm
-\subfigure[\textbf{Epoch 14}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/014}}
+\subfigure[\textbf{Epoch 200}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/0200}}
 \vskip 0.5cm
-\subfigure[\textbf{Epoch 28}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/028}}
+\subfigure[\textbf{Epoch 400}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/0400}}
 \hskip 2cm
-\subfigure[\textbf{Epoch 42}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/042}}
+\subfigure[\textbf{Epoch 600}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/0600}}
 \vskip 0.5cm
-\subfigure[\textbf{Epoch 56}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/056}}
+\subfigure[\textbf{Epoch 800}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/0800}}
 \hskip 2cm
-\subfigure[\textbf{Epoch 70}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/070}}
+\subfigure[\textbf{Epoch 1000}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/1000}}
 \vskip 0.5cm
-\subfigure[\textbf{Epoch 84}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/084}}
+\subfigure[\textbf{Epoch 1200}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/1200}}
 \hskip 2cm
-\subfigure[\textbf{Epoch 99}]{
-\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/099}}
+\subfigure[\textbf{Epoch 1500}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/1500}}
 }
 \caption{Sampled policies produced by Generator over different epochs}
 \label{fig:sampled_policies}

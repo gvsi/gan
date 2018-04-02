@@ -38,9 +38,9 @@ In figure~\ref{fig:MDP} we show a sample schematic of a Markov Decision Process,
 \label{qlearning}
 Now that we contextualised reinforcement learning environments as Markov Decision Processes, we can introduce the final objective of reinforcement learning tasks: finding a function $\Pi:S\mapsto A$ called \textbf{policy}, that maps the appropriate action $a\in A$ given the current state $s\in S$, as to maximise our agent's final reward.
 
-In particular, we will now present Q-learning \parencite{watkins1992q}, an algorithm that yields an optimal policy given an MDP.
+In particular, we will now present Q-learning \parencite{watkins1992q}.
 
-Q-learning lets us learn the \emph{quality}, or expected utility, for each state-action combination. That is, for each state, let's estimate all the expected rewards we obtain by taking each possible action at that particular state.
+Q-learning lets us learn the \emph{quality}, or expected utility, of each state-action combination. That is, for each state, we estimate all the expected rewards we obtain by taking each possible action at that particular state. This is represented as a state action table. We can use a Q-table to define a policy by always picking the action with the highest expected return.
 
 More formally, we estimate a function $Q: S \times A \to \mathbb{R}$. We can model $Q$ as a mapping table (initialised with some uniform values), whose value we update at each time step of our simulations.
 
@@ -76,13 +76,14 @@ where:
 What is our optimal policy when we do Q-learning then? After training, it is simply that function $\pi: S \to A$ that, for each state, returns the action with maximum expected utility in our Q-table.
 
 \subsection{Exploration/Exploitation tradeoff}
+%TODO Exploration/Exploitation tradeoff
 An important theme in reinforcement learning, and that we heavily focus our attention on in our project is the idea of the tradeoff between Exploration and Exploitation.
 
 \subsection{Deep Reinforcement Learning}
 \subsubsection{DQN}
 % Add DQN
-\subsection{Problems with reinforcement learning techniques}
-\subsection{Actor critic}
+%\subsection{Problems with reinforcement learning techniques}
+%\subsection{Actor critic}
 
 %----------------------------------------------------------------------------------------
 
@@ -136,11 +137,23 @@ The cost function for the whole system would look like the following minimax gam
 \subsubsection{DCGAN}
 % TODO: DCGAN
 
-\subsection{Conditional GANs}
+%\subsection{Conditional GANs}
 
 %----------------------------------------------------------------------------------------
 
 \section{Related work}
+\subsection{Reinforcement learning with unsupervised auxiliary tasks}
+There have few successes in transferring deep reinforcement learning across domains. Mostly notably, \cite{jaderberg2016reinforcement} introduced a technique to identify in an unsupervised way, multiple pseudo-reward functions based on all training signals that the agent collected as observations. While doing deep reinforcement learning, therefore, \citeauthor{jaderberg2016reinforcement} would not only try to directly maximise the agent's cumulative reward, but also all the identified extrinsic rewards. 
+
+There is a potential to re-use these identified extrinsic rewards in other domains, but this is an indirect way to tackle the problem of transferring behaviour. 
+
+In this work, they would first identify what auxiliary rewards the observations can give, to then reuse them on different task. Also, we have little to no control to guide the unsupervised exploration of auxiliary rewards functions towards a related task that we have the power to define.
+
+In fairness, \citeauthor{jaderberg2016reinforcement} introduced auxiliary rewards as a way to speed up reinforcement learning on a single task, rather than aiming to transfer these to related tasks.
+
+In our work we do not indirectly try to capture pseudo-rewards given a task, but we try to capture transferrable knowledge directly from the training policies.
+
+
 \subsection{Generative Adversarial Imitation Learning}
 
 An analogous way to do transfer learning in the context of reinforcement learning imitation learning, an important subfield of research in the reinforcement learning community. Imitation learning, as the name suggests, mostly deals with training agents that imitate an expert behaviour. 
@@ -182,7 +195,4 @@ In our work, we aim to achieve as great results in transferring knowledge across
 \includegraphics[width=15cm]{Figures/GAIL-GAN}
 \caption{Generative Adversarial Imitation Learning (GAIL) architecture}
 \label{fig:GAIL-GAN}
-\end{figure*}
-
-
-%----------------------------------------------------------------------------------------
+\end{figure*}%----------------------------------------------------------------------------------------
