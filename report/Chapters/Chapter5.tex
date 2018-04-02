@@ -168,7 +168,7 @@ With both RMSProp and Adam, we obtain a much better convergence compared to vani
 After optimising our hyperparameters with grid-search, our final optimal optimisation algorithm is the following: \\
 Adam, step size $\epsilon = 0.0002$, exponential decay rates $\rho_1 = 0.5$, $\rho_2 = 0.999$.
 
-%TODO Comparisons of design decisions
+%TODO Comparisons of design decisions graphs
 
 
 %----------------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ Following are the definitions of the considered activations functions with their
     \end{cases} 
 \end{equation} 
 
-\begin{figure}[H]
+\begin{figure}
 \vskip -3mm
 \begin{center}
 \centerline{\includegraphics[width=10cm]{Figures/ActivationFns}}
@@ -284,3 +284,76 @@ where $\gamma$ and $\beta$ are parameters updated with gradient descent that wil
 We trained two different models for both the Generator and the Discriminator models: one with Batch Normalisation and one without, keeping the rest of the architecture and hyperparameter settings fixed.
 Using Batch Normalisation in the Generator network leads to much faster convergence than the model that does not make use of it.
 The Discriminator network, effectively being a much less complex model than the Generator, did not benefit from batch-normalised inputs in terms of speed of model convergence and overall cost.
+
+%TODO: Couple of words on task generalisation + move architectures here
+
+\section{Verification}
+It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that it was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
+
+\subsection{Generator}
+Figure~\ref{fig:Qvalues} back in section~\ref{sec:analysisresults} showed the average intensity values of the Q-tables in the training test. As part of our verification process for the Generator, it may be useful to show some samples of policies that the neural network we just trained can produce.
+
+In figure~\ref{fig:sampled_policies} we show sets of sampled policies (16x4 Q-tables) from the Generator for different epochs, as we trained the GAN.
+
+At epoch 0, we expect the Generator to produce random matrices, and that looks like the case. As we train the GAN, we produce policies that will tend to fit within the initial distribution more and more.
+
+It is still a fairly hard task to verify this visually. If we were training on the MNIST dataset of handwritten digits (0-9), we would have a clear visualisation of the digits evolving from random matrices to scribbles, to real-looking handwritten digits.
+
+While we do not have a comparable, visual confirmation, we still notice a few things that are promising:
+\begin{enumerate}
+	\item In many sampled policies the second column or third column are the ones with the highest intensity in their row. This signifies that the policies our generator is producing tend to favour the actions of "going south" and "going east".
+	\item Higher intensive values then accumulate in the bottom rows, since those are the closest to the goal state, and we expect the agent to have high probability of reaching the goal at that point.
+	\item In all policies, the last row (row 16), which corresponds to the goal state, has all its values set to 0 (that is because an episode ends when we reach the goal state, and we do not update the Q-table any further at that point).
+\end{enumerate}
+
+Another way we used to verify that the Generator has been trained well for our purposes is to use sample a policy and check that there is a map configuration in the training set that can be solved using such policy.
+
+Indeed, we sampled 1,000 different policies, and 826 of these solve at least one task from the test set. We consider the task to be solved if it achieved at least 80\% of the score of the corresponding policy trained with Q-learning.
+
+In comparison, sampling 1,000 random 16x4 matrices and using them as policies only yielded 23 solved tasks. These 23 tasks are the ones which have very few holes in the Frozen Lake environment, and in which it is therefore considerably easier to reach the goal state with random actions.
+
+\begin{figure*}
+\vskip 2mm
+\centering{
+\subfigure[\textbf{Epoch 0}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/000}}
+\hskip 2cm
+\subfigure[\textbf{Epoch 14}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/014}}
+\vskip 0.5cm
+\subfigure[\textbf{Epoch 28}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/028}}
+\hskip 2cm
+\subfigure[\textbf{Epoch 42}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/042}}
+\vskip 0.5cm
+\subfigure[\textbf{Epoch 56}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/056}}
+\hskip 2cm
+\subfigure[\textbf{Epoch 70}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/070}}
+\vskip 0.5cm
+\subfigure[\textbf{Epoch 84}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/084}}
+\hskip 2cm
+\subfigure[\textbf{Epoch 99}]{
+\includegraphics[width=5cm,height=4cm]{Figures/GeneratorPolicies/099}}
+}
+\caption{Sampled policies produced by Generator over different epochs}
+\label{fig:sampled_policies}
+\vskip -2mm
+\end{figure*}
+
+\subsection{Discriminator}
+In this subsection we present two sanity checks on the Discriminator network.
+
+A first verification method is to run the Discriminator network with the policies in the test set. In other words, run a forward pass given the policies in the test set as inputs.
+
+We expect the Discriminator to label these as real policies. Recall that the output of the Discriminator network is a single scalar value in $(0,1)$ representing the probability that the input policy is real or fake. The average output predicted value for the 765 policies in the test set is 0.79, indicating that the Discriminator correctly leans towards categorising these policies as being real.
+
+% TODO: Plot?
+
+As an additional check, we also retrain the test map configurations with Q-learning, but with half as many number of episodes (5,000 instead of 10,000). With fewer simulations and iterations in Q-learning, the policies that we train will yield lower average scores. We run these "half-trained" policies through the Discriminator once more. We obtain an average predicted score of 0.66. This is lower than the 0.79 we obtained with the policies in the test set, and it intuitively makes sense that we now obtain a lower average predicted value, since these "half-trained" policies do not fit the distribution of "fully-trained" policies in the training data.
+Another set of sanity checks we conduct is to make sure that the Discriminator is not biased towards categorising any input as being real. We generate 1,000 random 16x4 matrices, and the average predicted output of the Discriminator is 0.008, which is a good sign that we have a healthy neural network.
+
+% TODO: Table?
