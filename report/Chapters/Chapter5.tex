@@ -64,18 +64,18 @@ Adam (algorithm \ref{alg:Adam}) is best described as a combination of RMSProp an
 
 \begin{algorithm}[ht]
 \begin{algorithmic}
-   \STATE {\bfseries Require:} Global learning rate $\epsilon$, decay rate $\rho$
-   \STATE {\bfseries Require:} Initial parameter $\theta$
-   \STATE {\bfseries Require:} Small constant $\delta$, usually $10^{-6}$, used to stabilize division by small number
+   \State {\bfseries Require:} Global learning rate $\epsilon$, decay rate $\rho$
+   \State {\bfseries Require:} Initial parameter $\theta$
+   \State {\bfseries Require:} Small constant $\delta$, usually $10^{-6}$, used to stabilize division by small number
    
-   \STATE Initialize accumulation variables $\boldsymbol{r=0}$
-   \WHILE{stopping criterion not met}{}
-   \STATE Sample a minibatch of $m$ examples from the training set $\{x^{(1)},...,x^{(m)}\}$ with corresponding targets $y^{i}$.
-   \STATE Compute gradient: $\boldsymbol{g \leftarrow \frac{1}{m}\nabla_\theta \sum_i L(f(x^{(i)}; \theta), y^{(i)}).}$
-   \STATE Accumulate squared gradient: \\ $\boldsymbol{r \leftarrow \rho r + (1 - \rho) g \odot g}$
-   \STATE Compute parameter update: $\boldsymbol{\Delta\theta = -\frac{\epsilon}{\sqrt{\delta+r}} \odot g.}$ ($\frac{1}{\sqrt{\delta+r}}$ applied element-wise)
-   \STATE Apply update: $\boldsymbol{\theta \leftarrow \theta + \Delta \theta}$
-   \ENDWHILE
+   \State Initialize accumulation variables $\boldsymbol{r=0}$
+   \While{stopping criterion not met}{}
+   \State Sample a minibatch of $m$ examples from the training set $\{x^{(1)},...,x^{(m)}\}$ with corresponding targets $y^{i}$.
+   \State Compute gradient: $\boldsymbol{g \leftarrow \frac{1}{m}\nabla_\theta \sum_i L(f(x^{(i)}; \theta), y^{(i)}).}$
+   \State Accumulate squared gradient: \\ $\boldsymbol{r \leftarrow \rho r + (1 - \rho) g \odot g}$
+   \State Compute parameter update: $\boldsymbol{\Delta\theta = -\frac{\epsilon}{\sqrt{\delta+r}} \odot g.}$ ($\frac{1}{\sqrt{\delta+r}}$ applied element-wise)
+   \State Apply update: $\boldsymbol{\theta \leftarrow \theta + \Delta \theta}$
+   \EndWhile
 \end{algorithmic}
   \caption{RMSProp algorithm}
   \label{alg:RMSProp}
@@ -84,24 +84,24 @@ Adam (algorithm \ref{alg:Adam}) is best described as a combination of RMSProp an
 
 \begin{algorithm}[ht]
 \begin{algorithmic}
-   \STATE {\bfseries Require:} Step size $\epsilon$ (Suggested default: 0.001)
-   \STATE {\bfseries Require:} Exponential decay rates for moment estimates, $\rho_1$ and $\rho_2$ in $[0,1)$. (Suggested defaults: 0.9 and 0.999 respectively)
-   \STATE {\bfseries Require:} Small constant $\delta$ used for numerical stabilisation (Suggested default: $10^{-8}$)
-   \STATE {\bfseries Require:} Initial parameters $\theta$
+   \State {\bfseries Require:} Step size $\epsilon$ (Suggested default: 0.001)
+   \State {\bfseries Require:} Exponential decay rates for moment estimates, $\rho_1$ and $\rho_2$ in $[0,1)$. (Suggested defaults: 0.9 and 0.999 respectively)
+   \State {\bfseries Require:} Small constant $\delta$ used for numerical stabilisation (Suggested default: $10^{-8}$)
+   \State {\bfseries Require:} Initial parameters $\theta$
    
-   \STATE Initialise 1st and 2nd moment variables $\mathbf{s=0, r=0}$
-   \STATE Initialise time step $t=0$
-   \WHILE{stopping criterion not met}{}
-   \STATE Sample a minibatch of $m$ examples from the training set $\{x^{(1)},...,x^{(m)}\}$ with corresponding targets $y^{i}$.
-   \STATE Compute gradient: $\boldsymbol{g \leftarrow \frac{1}{m}\nabla_\theta \sum_i L(f(x^{(i)}; \theta), y^{(i)}).}$
-   \STATE $t \leftarrow t + 1$
-   \STATE Update biased first moment estimate: $\boldsymbol{s \leftarrow \rho_1 s + (1-\rho_1) g}$
-   \STATE Update biased second moment estimate: $\boldsymbol{r \leftarrow \rho_2 r + (1-\rho_2) g \odot g}$
-   \STATE Correct bias in first moment: $\boldsymbol{\hat{s} \leftarrow \frac{s}{1-\rho_1^t}}$
-   \STATE Correct bias in second moment: $\boldsymbol{\hat{r} \leftarrow \frac{r}{1-\rho_2^t}}$
-   \STATE Compute update: $\boldsymbol{\Delta \theta = -\epsilon \frac{\hat{s}}{\sqrt{\hat{r}} + \delta}}$
-   \STATE Apply update: $\boldsymbol{\theta \leftarrow \theta + \Delta \theta}$
-   \ENDWHILE
+   \State Initialise 1st and 2nd moment variables $\mathbf{s=0, r=0}$
+   \State Initialise time step $t=0$
+   \While{stopping criterion not met}{}
+   \State Sample a minibatch of $m$ examples from the training set $\{x^{(1)},...,x^{(m)}\}$ with corresponding targets $y^{i}$.
+   \State Compute gradient: $\boldsymbol{g \leftarrow \frac{1}{m}\nabla_\theta \sum_i L(f(x^{(i)}; \theta), y^{(i)}).}$
+   \State $t \leftarrow t + 1$
+   \State Update biased first moment estimate: $\boldsymbol{s \leftarrow \rho_1 s + (1-\rho_1) g}$
+   \State Update biased second moment estimate: $\boldsymbol{r \leftarrow \rho_2 r + (1-\rho_2) g \odot g}$
+   \State Correct bias in first moment: $\boldsymbol{\hat{s} \leftarrow \frac{s}{1-\rho_1^t}}$
+   \State Correct bias in second moment: $\boldsymbol{\hat{r} \leftarrow \frac{r}{1-\rho_2^t}}$
+   \State Compute update: $\boldsymbol{\Delta \theta = -\epsilon \frac{\hat{s}}{\sqrt{\hat{r}} + \delta}}$
+   \State Apply update: $\boldsymbol{\theta \leftarrow \theta + \Delta \theta}$
+   \EndWhile
 \end{algorithmic}
   \caption{Adam algorithm}
   \label{alg:Adam}
@@ -284,13 +284,13 @@ We report here the architectures of final optimal deep neural networks for the G
 	\end{itemize}
 \end{itemize}
 
-Let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as typical with gradient-based optimisations), we also provide on the right, a smoothed version with IIR filtering. We notice that both  converge after around 1,000 epochs of training.
+Let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as it is typical with gradient-based optimisations), we also provide a version smoothed with IIR filtering, on the right. We notice that both losses asymptotically converge after around 1,000 epochs of training.
 
-Initially, observing the Discriminator's loss (blue) it appears that the neural network was perfectly trained, as its loss was hovering just around 0. That is due to the fact that the Generator was not properly trained yet (notice the high losses), as was producing garbage policies that the Discriminator was easily able to discern.
+Initially, we observe that the Discriminator's loss (in blue) hovers just around 0. That is due to the fact that the Generator was not properly trained yet (notice the its high losses in orange). In early epochs, the Generator is likely producing unrealistic policies that the Discriminator is easily able to discern.
 
-However, as we train the Generator a few more epochs, the policies that it produces tend to fit the initial distribution of policies more, which make the Discriminator loss increase slightly. Both then converge after a few more epochs.
+However, as we train the Generator a few more epochs, the policies that it produces tend to fit the initial distribution of policies more, which make its loss decrease, and the Discriminator loss increase slightly. Both then converge after a few more hundred epochs, at around epoch 1,000.
 
-It takes the Generator more epochs to train since it is a neural network with much higher complexity (one additional hidden layer, and more hidden units). This explains the trend of both losses.
+It takes the Generator more epochs to train since it is a neural network with much higher complexity (one additional hidden layer, and more hidden units). This explains the trend of both losses that the figure reports.
 
 \begin{figure}
 \centering
@@ -302,29 +302,29 @@ It takes the Generator more epochs to train since it is a neural network with mu
 
 
 \section{Verification}
-It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that it was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
+It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that the GAN was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
 
 \subsection{Generator}
-Figure~\ref{fig:Qvalues} back in section~\ref{sec:analysisresults} showed the average intensity values of the Q-tables in the training test. As part of our verification process for the Generator, it may be useful to show some samples of policies that the neural network we just trained can produce.
+Figure~\ref{fig:Qvalues} back in section~\ref{sec:analysisresults} showed the average intensity values of the Q-tables in the training test. As part of our verification process for the Generator, it is useful to show some samples of Q-tables that the neural network we just trained can produce.
 
-In figure~\ref{fig:sampled_policies} we show sets of sampled policies (16x4 Q-tables) from the Generator for different epochs, as we trained the GAN.
+In figure~\ref{fig:sampled_policies} we show sets of sampled Q-tables (16x4 matrices) from the Generator for different epochs, as we trained the GAN.
 
-At epoch 0, we expect the Generator to produce random matrices, and that looks like the case. As we train the GAN, we produce policies that will tend to fit within the initial distribution more and more.
+At epoch 0, we expect the Generator to produce random matrices, and that looks like the case. As we train the GAN, we produce Q-tables that will tend to fit within the initial distribution more and more.
 
 It is still a fairly hard task to verify this visually. If we were training on the MNIST dataset of handwritten digits (0-9), we would have a clear visualisation of the digits evolving from random matrices to scribbles, to real-looking handwritten digits.
 
 While we do not have a comparable, visual confirmation, we still notice a few things that are promising:
 \begin{enumerate}
-	\item In many sampled policies the second column or third column are the ones with the highest intensity in their row. This signifies that the policies our generator is producing tend to favour the actions of "going south" and "going east".
+	\item In many sampled Q-tables, the second column or third column are the ones with the highest intensity in their row. This signifies that the policies our generator is producing tend to favour the actions of "going south" and "going east".
 	\item Higher intensive values then accumulate in the bottom rows, since those are the closest to the goal state, and we expect the agent to have high probability of reaching the goal at that point.
-	\item In all policies, the last row (row 16), which corresponds to the goal state, has all its values set to 0 (that is because an episode ends when we reach the goal state, and we do not update the Q-table any further at that point).
+	\item In all Q-tables, the last row (row 16), which corresponds to the goal state, has all its values set to 0 (that is because an episode ends when we reach the goal state, and we do not update the Q-table any further at that point).
 \end{enumerate}
 
-Another way we used to verify that the Generator has been trained well for our purposes is to use sample a policy and check that there is a map configuration in the training set that can be solved using such policy.
+Another way we used to verify that the Generator has been trained well for our purposes is to use sample a Q-table and check that there is a map configuration in the training set that can be solved using the policy derived from the Q-table.
 
-Indeed, we sampled 1,000 different policies, and 826 of these solve at least one task from the test set. We consider the task to be solved if it achieved at least 80\% of the score of the corresponding policy trained with Q-learning.
+Indeed, we sampled 1,000 different Q-tables, and 826 of the policies derived from these Q-tables solve at least one task from the test set. We consider the task to be solved if it achieved at least 80\% of the score of the corresponding policy trained with Q-learning.
 
-In comparison, sampling 1,000 random 16x4 matrices and using them as policies only yielded 23 solved tasks. These 23 tasks are the ones which have very few holes in the Frozen Lake environment, and in which it is therefore considerably easier to reach the goal state with random actions.
+In comparison, sampling 1,000 random 16x4 matrices and deriving policies from these only yielded 23 solved tasks. These 23 tasks are the ones which have very few holes in the Frozen Lake environment, and in which it is therefore considerably easier to reach the goal state with random actions.
 
 \begin{figure*}
 \vskip 2mm
@@ -361,13 +361,26 @@ In comparison, sampling 1,000 random 16x4 matrices and using them as policies on
 \subsection{Discriminator}
 In this subsection we present two sanity checks on the Discriminator network.
 
-A first verification method is to run the Discriminator network with the policies in the test set. In other words, run a forward pass given the policies in the test set as inputs.
+A first verification method is to run the Discriminator network with the Q-tables/policies in the test set. In other words, run a forward pass given the Q-tables in the test set as inputs.
 
-We expect the Discriminator to label these as real policies. Recall that the output of the Discriminator network is a single scalar value in $(0,1)$ representing the probability that the input policy is real or fake. The average output predicted value for the 765 policies in the test set is 0.79, indicating that the Discriminator correctly leans towards categorising these policies as being real.
+We expect the Discriminator to label these as real Q-tables. Recall that the output of the Discriminator network is a single scalar value in $(0,1)$ representing the probability that the input policy is real or fake. The average output predicted value for the 765 policies in the test set is 0.79, indicating that the Discriminator correctly leans towards categorising these policies as being real.
 
 % TODO: Plot?
 
-As an additional check, we also retrain the test map configurations with Q-learning, but with half as many number of episodes (5,000 instead of 10,000). With fewer simulations and iterations in Q-learning, the policies that we train will yield lower average scores. We run these "half-trained" policies through the Discriminator once more. We obtain an average predicted score of 0.66. This is lower than the 0.79 we obtained with the policies in the test set, and it intuitively makes sense that we now obtain a lower average predicted value, since these "half-trained" policies do not fit the distribution of "fully-trained" policies in the training data.
+As an additional check, we also retrain the test map configurations with Q-learning, but with half as many number of episodes (5,000 instead of 10,000). With fewer simulations and iterations in Q-learning, the policies that we train will yield lower average scores. We run these 1,000 of "half-trained" policies through the Discriminator once more. We obtain an average predicted score of 0.66. This is lower than the 0.79 we obtained with the policies in the test set, and it intuitively makes sense that we now obtain a lower average predicted value, since these "half-trained" policies do not fit the distribution of "fully-trained" policies in the training data.
 Another set of sanity checks we conduct is to make sure that the Discriminator is not biased towards categorising any input as being real. We generate 1,000 random 16x4 matrices, and the average predicted output of the Discriminator is 0.008, which is a good sign that we have a healthy neural network.
 
-% TODO: Table?
+In table~\ref{table:discrim_scores} we report the scores we obtained using these three different policies.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+Policies                      & Mean Discriminator Score \\ \midrule
+756 test policies             & 0.79                               \\
+1,000 "half-trained" policies & 0.66                               \\
+1,000 random policies         & 0.008                              \\ \bottomrule
+\end{tabular}
+\caption{Mean Predicted Discriminator Scores for different policies}
+\label{table:discrim_scores}
+\end{table}

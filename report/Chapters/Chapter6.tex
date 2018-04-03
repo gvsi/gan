@@ -4,10 +4,86 @@
 
 \label{Chapter6}
 
-%TODO: Each section an approach + pseudocode/algorithm
 %----------------------------------------------------------------------------------------
 \section{Using the trained Discriminator}
 \subsection{Speeding up Q-learning on unseen maps}
+
+\subsubsection{Approach 1}
+\[Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q_{t})}_{\rm gradient~of~D~at~Q_{t}}\]
+
+\subsubsection{Approach 2}
+  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
+  \underbrace{\alpha}_{\rm learning~rate} \times \left[
+    \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
+        discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
+        estimate~of~optimal~future~value}}^{\rm learned~value} -
+    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
+    
+    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
+
+\subsubsection{Approach 3}
+
+  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
+  \underbrace{\alpha}_{\rm learning~rate} \times \left[
+    \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
+        discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
+        estimate~of~optimal~future~value}}^{\rm learned~value} -
+    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
+    
+    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
+
+%   \[\frac{\sum_{i}^{test~set} valid\_score(Q_i) - valid\_score(Q_i')}{\#(test~set)}\]
+
+
+
+Recall the $Q$ function:
+
+\begin{equation*}
+Q(s,a) = R(s) + \gamma \sum_{s'}P(s'|s,a)V(s')
+\end{equation*}
+
+We can run dynamic programming (value iteration) by performing the
+Bellman back-ups in terms of the $Q$ function as follows:
+
+\begin{eqnarray*}
+&& \mbox{Iterate: } \\
+&& \forall s, a: Q(s,a) \leftarrow R(s) + \gamma \sum_{s'} P(s'|s,a) \max_{a'} Q(s',a')
+\end{eqnarray*}
+
+
+
+Initialize $Q(s,a)$ arbitrary ($\forall s, a$). 
+\begin{itemize}
+\item For $t = 0, 1, 2, \ldots$
+\subitem Choose the action $a_t$ for the current state $s_t$. (E.g., by using an $\epsilon$ greedy policy.)
+\subitem Take action $a_t$, observe $R(s_t)$, $s_{t+1}$
+\subitem $Q(s_t,a_t) \leftarrow (1-\alpha_t)Q(s_t,a_t) + \alpha_t[R(s) + \gamma \displaystyle \max_{a} \displaystyle{Q(s_{t+1}, a)}] \ \ \ \ \ \ (*)$
+\end{itemize}
+
+%\begin{algorithm}
+%\begin{algorithmic}[1]
+%\Require
+% 	\STATE $S$ is a set of states
+% 	\STATE $A$ is a set of actions
+% 	\STATE $\gamma$ the discount reward factor
+% 	\STATE $\alpha$ is the learning rate
+%\Procedure{Q-Learning}{$S,A,\gamma,\alpha$}
+%	\STATE real array $Q[S,A]$
+%	\STATE previous state $s$
+%	\STATE previous action $a$
+%	\STATE initialise $Q[S,A]$ arbitrarily
+%	\STATE observe current state s
+%	\Repeat
+%		\STATE select and carry out an action $a$
+%		\STATE observe reward $r$ and state $s'$
+%		\STATE $Q[s,a] \gets Q[s,a]+\alpha(r+\gamma max_{a'}Q[s',a']-Q[s,a])$
+%		\STATE $s \gets s'$
+%	\Until{termination}
+%\EndProcedure
+%\end{algorithmic}
+%\caption{Q-Learing Procedure.}\label{alg:qlearning}
+%\end{algorithm}
+
 
 %----------------------------------------------------------------------------------------
 
