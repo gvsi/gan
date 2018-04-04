@@ -94,7 +94,7 @@ def validate(self):
 
 %----------------------------------------------------------------------------------------
 
-\section{Distributed Q-learning}
+\section{Distributing Q-learning with MapReduce}
 Now that we formalised our experiment setup, we can run Q-learning on each of the map configurations of our \code{RandomisedFrozenLake}. For the 4x4 grid there are 3,827 possible valid map configurations. It takes an average of 15 seconds to train each Q-learning table on a 2.5 GHz Intel Core i7 processor. On a single machine, it would take around 16 CPU hours to run the whole set of experiments.
 
 To make this step of our pipeline faster and scalable to more data, we decide to set up a distributed processing on a cluster with multiple machines. More precisely, we set up a MapReduce framework \parencite{Dean:2004:MSD:1251254.1251264} implementation running on an Hadoop cluster \parencite{shvachko2010hadoop} of 25 machines.
@@ -125,6 +125,7 @@ Indeed, according to the reward system that we described in section~\ref{sec:adj
 % TODO: Plot rewards plot with std
 % TODO: Define acceptable line and when it is achieved
 
+STILL NEED TO FINISH THIS ANALYSIS
 \begin{figure}
 \centering
 \includegraphics[width=3cm]{Figures/Qtable_mean}

@@ -23,7 +23,7 @@
 %----------------------------------------------------------------------------------------
 \PassOptionsToPackage{table,xcdraw}{xcolor}
 \documentclass[
-11pt, % The default document font size, options: 10pt, 11pt, 12pt
+12pt, % The default document font size, options: 10pt, 11pt, 12pt
 %oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
 english, % ngerman for German
 singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing
@@ -55,7 +55,10 @@ headsepline, % Uncomment to get a line under the header
 
 % For algorithms
 \usepackage{algorithm}
-\usepackage{algorithmic}
+%\usepackage{algorithmic}
+\usepackage{algpseudocode}
+%\usepackage{algpseudocode}
+%\usepackage{braket} % needed for \Set
 
 \usepackage{listings}
 \usepackage{color}
@@ -106,7 +109,7 @@ headsepline, % Uncomment to get a line under the header
 %	THESIS INFORMATION
 %----------------------------------------------------------------------------------------
 
-\thesistitle{Generative Adversarial Networks Generating Novel Reinforcement Learning Policies} % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
+\thesistitle{Transfer Learning with Generative Adversarial Networks in Reinforcement Learning Tasks} % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
 \supervisor{Dr. Timothy \textsc{Hospedales}} % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
 \examiner{} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
 \degree{Bachelor's of Engineering} % Your degree name, this is used in the title page and abstract, print it elsewhere with \degreename
@@ -141,7 +144,7 @@ headsepline, % Uncomment to get a line under the header
 
 \vspace*{.06\textheight}
 {\scshape\LARGE \univname\par}\vspace{1.5cm} % University name
-\textsc{\Large Informatics Honors Project}\\[0.5cm] % Thesis type
+\textsc{\Large Informatics Honors Thesis}\\[0.5cm] % Thesis type
 
 \HRule \\[0.4cm] % Horizontal line
 {\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
@@ -228,10 +231,11 @@ headsepline, % Uncomment to get a line under the header
 %	ACKNOWLEDGEMENTS
 %----------------------------------------------------------------------------------------
 
-%\begin{acknowledgements}
-%\addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
-%The acknowledgments and the people to thank go here, don't forget to include your project advisor\ldots
-%\end{acknowledgements}
+\begin{acknowledgements}
+\addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
+%TODO
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\end{acknowledgements}
 
 %----------------------------------------------------------------------------------------
 %	LIST OF CONTENTS/FIGURES/TABLES PAGES

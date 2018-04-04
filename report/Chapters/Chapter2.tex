@@ -38,35 +38,22 @@ In figure~\ref{fig:MDP} we show a sample schematic of a Markov Decision Process,
 \label{qlearning}
 Now that we contextualised reinforcement learning environments as Markov Decision Processes, we can introduce the final objective of reinforcement learning tasks: finding a function $\Pi:S\mapsto A$ called \textbf{policy}, that maps the appropriate action $a\in A$ given the current state $s\in S$, as to maximise our agent's final reward.
 
-In particular, we will now present Q-learning \parencite{watkins1992q}, an algorithm that yields an optimal policy given an MDP.
+In particular, we will now present Q-learning \parencite{watkins1992q}.
 
-Q-learning lets us learn the \emph{quality}, or expected utility, for each state-action combination. That is, for each state, let's estimate all the expected rewards we obtain by taking each possible action at that particular state.
+Q-learning lets us learn the \emph{quality}, or expected utility, of each state-action combination. That is, for each state, we estimate all the expected rewards we obtain by taking each possible action at that particular state. This is represented as a state action table. We can use a Q-table to define a policy by always picking the action with the highest expected return.
 
 More formally, we estimate a function $Q: S \times A \to \mathbb{R}$. We can model $Q$ as a mapping table (initialised with some uniform values), whose value we update at each time step of our simulations.
 
-% TODO Pseudocode for Q-learning
-
 Here's how we update our Q-table at each time step $t$:
-  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
+\begin{equation} \label{eq:QlearningUpdate}
+  Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
   \underbrace{\alpha}_{\rm learning~rate} \times \left[
     \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
         discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
         estimate~of~optimal~future~value}}^{\rm learned~value} -
-    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right] \]
+    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]
+\end{equation}
 
-% TODO: Clean this up    
-%\[Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q_{t})}_{\rm gradient~of~D~at~Q_{t}}\]
-%
-%  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
-%  \underbrace{\alpha}_{\rm learning~rate} \times \left[
-%    \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
-%        discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
-%        estimate~of~optimal~future~value}}^{\rm learned~value} -
-%    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
-%    
-%    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
-%   
-%   \[\frac{\sum_{i}^{test~set} valid\_score(Q_i) - valid\_score(Q_i')}{\#(test~set)}\]
 where:
 \begin{itemize}
 	\item $\alpha\in[0,1]$ is the \emph{learning rate}, a coefficient that regulates how much the newly learned values will contribute in the update
@@ -75,14 +62,62 @@ where:
 
 What is our optimal policy when we do Q-learning then? After training, it is simply that function $\pi: S \to A$ that, for each state, returns the action with maximum expected utility in our Q-table.
 
+Algorithm~\ref{alg:Qlearning} reports the pseudocode for Q-learning.
+
+\begin{algorithm}
+\caption{Q-learning}
+\label{alg:Qlearning}
+\begin{algorithmic}[1]
+\Require $n$, number of episodes to run Q-learning
+\Require $\epsilon$, probability to take random action, rather than follow policy
+\Procedure{Q-Learning} {}
+\\Initialize $Q(s,a)$ arbitrarily
+\For{each episode}
+\\ \qquad Initialize $s$
+\For{each step of episode}
+\\ \qquad \qquad Choose $a_t$ from $s_t$ using policy derived from $Q$ with $\epsilon$-Greedy
+\\ \qquad \qquad Take action $a_t$, observe $u$ and $s_{t+1}$
+\\ \qquad \qquad Update Q-table using equation~\ref{eq:QlearningUpdate}
+\EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+From this procedure we need to highlight two important concepts.
+
+The first one is the concept of episode, which is defined as a sequence of actions in which an agent (the algorithm) interacts with its environment until it reaches a certain terminal. In Q-learning we need to specify a certain number of episodes that we will run the algorithm for. The more episodes we choose, that more optimal the policy is likely to be, since the has more interactions with its environment.
+
+The second concept is that of $\epsilon$-greedy, which we introduce in the next subsection on the tradeoff in Reinforcement Learning between exploration and exploitation.
+
 \subsection{Exploration/Exploitation tradeoff}
-An important theme in reinforcement learning, and that we heavily focus our attention on in our project is the idea of the tradeoff between Exploration and Exploitation.
+An important theme in reinforcement learning, and that we also focus our attention on in our project is the idea of the tradeoff between Exploration and Exploitation.
+
+In reinforcement learning, and generally in decision making, we have a fundamental choice: \textit{exploitation}, whereby you make the best decision given current information, or \textit{exploration}, where we prefer gather more information.
+
+The reason why this is a trade-off is because the best long-term strategy may involve short-term sacrifices, so we wish to gather enough information to make the best overall decisions.
+
+For example, consider the case where we need to choose a restaurant for dinner. We can either go to our favourite restaurant (exploitation), or we could choose to try a new restaurant (exploration) with the hope that it is eventually better than our favourite, but also risking that it is worse.
+
+In reinforcement learning this usually can be represented as an $\epsilon$-greedy approach. In this approach, we choose to either \textit{exploit} our current knowledge and choose the action $a_t^*$ that we think is optimal given what we currently know, or we choose to \textit{explore} by taking a random action.
+
+\[
+a_t =
+\left\{
+	\begin{array}{ll}
+		a_t^*   & \mbox{with probability 1-$\epsilon$}\\
+		\text{random action} & \mbox{with probability $\epsilon$}
+	\end{array}
+\right.
+\]
+
+It is critical to account for this tradeoff when developing algorithms in reinforcement learning, and we will show how we can still keep allow for both exploration and exploitation with the techniques that we develop.
 
 \subsection{Deep Reinforcement Learning}
 \subsubsection{DQN}
 % Add DQN
-\subsection{Problems with reinforcement learning techniques}
-\subsection{Actor critic}
+%\subsection{Problems with reinforcement learning techniques}
+%\subsection{Actor critic}
 
 %----------------------------------------------------------------------------------------
 
@@ -136,11 +171,23 @@ The cost function for the whole system would look like the following minimax gam
 \subsubsection{DCGAN}
 % TODO: DCGAN
 
-\subsection{Conditional GANs}
+%\subsection{Conditional GANs}
 
 %----------------------------------------------------------------------------------------
 
 \section{Related work}
+\subsection{Reinforcement learning with unsupervised auxiliary tasks}
+There have few successes in transferring deep reinforcement learning across domains. Mostly notably, \cite{jaderberg2016reinforcement} introduced a technique to identify in an unsupervised way, multiple pseudo-reward functions based on all training signals that the agent collected as observations. While doing deep reinforcement learning, therefore, \citeauthor{jaderberg2016reinforcement} would not only try to directly maximise the agent's cumulative reward, but also all the identified extrinsic rewards. 
+
+There is a potential to re-use these identified extrinsic rewards in other domains, but this is an indirect way to tackle the problem of transferring behaviour. 
+
+In this work, they would first identify what auxiliary rewards the observations can give, to then reuse them on different task. Also, we have little to no control to guide the unsupervised exploration of auxiliary rewards functions towards a related task that we have the power to define.
+
+In fairness, \citeauthor{jaderberg2016reinforcement} introduced auxiliary rewards as a way to speed up reinforcement learning on a single task, rather than aiming to transfer these to related tasks.
+
+In our work we do not indirectly try to capture pseudo-rewards given a task, but we try to capture transferrable knowledge directly from the training policies.
+
+
 \subsection{Generative Adversarial Imitation Learning}
 
 An analogous way to do transfer learning in the context of reinforcement learning imitation learning, an important subfield of research in the reinforcement learning community. Imitation learning, as the name suggests, mostly deals with training agents that imitate an expert behaviour. 
@@ -168,12 +215,12 @@ In our work, we aim to achieve as great results in transferring knowledge across
     \caption{Generative adversarial imitation learning}
     \label{alg:gail}
     \begin{algorithmic}[1]
-       \STATE {\bfseries Input:} Expert trajectories $\tau_E \sim \pi_E$, initial policy and discriminator parameters $\theta_0, w_0$
-       \FOR{$i = 0, 1, 2, \dotsc$}
-           \STATE Sample trajectories $\tau_i \sim \pi_{\theta_i}$
-           \STATE Update the discriminator parameters from $w_i$ to $w_{i+1}$ with the gradient
-           \STATE Take a policy step from $\theta_i$ to $\theta_{i+1}$, using the TRPO/PPO rule.
-       \ENDFOR
+       \State {\bfseries Input:} Expert trajectories $\tau_E \sim \pi_E$, initial policy and discriminator parameters $\theta_0, w_0$
+       \For{$i = 0, 1, 2, \dotsc$}
+           \State Sample trajectories $\tau_i \sim \pi_{\theta_i}$
+           \State Update the discriminator parameters from $w_i$ to $w_{i+1}$ with the gradient
+           \State Take a policy step from $\theta_i$ to $\theta_{i+1}$, using the TRPO/PPO rule.
+        \EndFor
     \end{algorithmic}
 \end{algorithm}
 
@@ -182,7 +229,4 @@ In our work, we aim to achieve as great results in transferring knowledge across
 \includegraphics[width=15cm]{Figures/GAIL-GAN}
 \caption{Generative Adversarial Imitation Learning (GAIL) architecture}
 \label{fig:GAIL-GAN}
-\end{figure*}
-
-
-%----------------------------------------------------------------------------------------
+\end{figure*}%----------------------------------------------------------------------------------------
