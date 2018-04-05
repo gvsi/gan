@@ -23,6 +23,9 @@ from keras.optimizers import Adam
 import keras.backend as K
 from keras.models import load_model
 
+from baselines import bench, logger
+from shutil import copyfile, move
+
 def verify(env, Q, num_episodes = 10000):
     # Set learning parameters
     #create lists to contain total rewards and steps per episode
@@ -111,11 +114,13 @@ class Experiment(object):
                 if d == True and r != 1:
                     self.Q[s, a] -= 0.01
                 #Update Q-Table with new knowledge
-                if i < 1000:
+                if i < 5000:
                     self.Q[s,a] = self.Q[s,a] + lr*(r + y*np.max(self.Q[s1,:]) - self.Q[s,a])
                 else:
                     self.Q[s,a] = self.Q[s,a] + lr*(r + y*np.max(self.Q[s1,:]) - self.Q[s,a])
-                    self.Q[s,a] = self.Q[s,a] - 0.5 * np.reshape(get_gradient([np.array([np.expand_dims(self.Q, axis=3)])]), (16, 4))[s,a]
+                    # self.Q[s,a] = self.Q[s,a] - 0.5 * np.reshape(get_gradient([np.array([np.expand_dims(self.Q, axis=3)])]), (16, 4))[s,a]
+                    # self.Q = self.Q - 0.3 * np.reshape(get_gradient([np.array([np.expand_dims(self.Q, axis=3)])]), (16, 4))
+                    self.Q[s,:] = self.Q[s,:] - 0.5 * np.reshape(get_gradient([np.array([np.expand_dims(self.Q, axis=3)])]), (16, 4))[s,:]
                 rAll += r
                 s = s1
                 if d == True and r > 0:
@@ -165,7 +170,7 @@ def new_env(env_map, slippery=True, MY_ENV_NAME='MyFrozenLake-v0'):
     return env
 
 
-discriminator = load_model("../data/gan/D_params_keras.p")
+discriminator = load_model("../data/gan/D_params_keras2.p")
 
 output = discriminator.outputs[-1]
 loss = (1 - output) ** 2
@@ -175,19 +180,23 @@ get_gradient = K.function(inputs=input_tensors, outputs=grad)
 
 
 lines = []
-
+scores = {}
 
 for line in sys.stdin:
     w = line.strip()
     map_str_comb, dic = w.split("\t")
     obj = loads(dic)
-    if obj['train_machine'] == socket.gethostname():
-        lines.append(map_str_comb)
+    lines.append(map_str_comb)
+    scores[map_str_comb] = obj['valid_score']
+
+    # if obj['train_machine'] == socket.gethostname():
+    #lines.append(map_str_comb)
+    #lines.append(w)
 
 random.shuffle(lines)
 
 while lines:
-    set_name = "data4_valid_mul5_gan"
+    set_name = "data4_gan_row_10000x5+push"
     w = lines.pop()
     print("Running: " + w)
     if os.path.isfile("../data/"+set_name+"/res/"+w+".txt"):
@@ -198,15 +207,55 @@ while lines:
         # split into lines
         map_str = [w[i:i+n] for i in range(0, len(w), n)]
         env = new_env(map_str, slippery=True)
-        exp = Experiment(env, num_episodes=2000)
+        env = bench.Monitor(env, "../data/"+set_name+"/logs/" + w)
+        exp = Experiment(env, num_episodes=10000)
         exp.run()
-        for _ in range(5):
-            new_exp = Experiment(env, num_episodes=2000)
-            new_exp.run()
-            if new_exp.score > exp.score:
-                exp = new_exp
+
         print("Validating...")
         exp.validate()
+
+        copyfile("../data/"+set_name+"/logs/" + w + ".monitor.csv", "../data/"+set_name+"/logs/best_" + w + ".monitor.csv")
+
+        if exp.valid_score < scores[w]:
+            repeats = 5
+            for _ in range(repeats):
+                os.remove("../data/"+set_name+"/logs/" + w + ".monitor.csv")
+                env = bench.Monitor(new_env(map_str, slippery=True), "../data/"+set_name+"/logs/" + w)
+                new_exp = Experiment(env, num_episodes=10000)
+                new_exp.run()
+                new_exp.validate()
+                if new_exp.valid_score > exp.valid_score:
+                    copyfile("../data/"+set_name+"/logs/" + w + ".monitor.csv", "../data/"+set_name+"/logs/best_" + w + ".monitor.csv")
+                    exp = new_exp
+                    if exp.valid_score >= scores[w]:
+                        print("Found better one", exp.valid_score)
+                        break
+        else:
+            print("Already better", exp.valid_score)
+
+        # Only keep best
+        os.remove("../data/"+set_name+"/logs/" + w + ".monitor.csv")
+        move("../data/"+set_name+"/logs/best_" + w + ".monitor.csv", "../data/"+set_name+"/logs/" + w + ".monitor.csv")
+
+        #push
+        if exp.valid_score == 0 and scores[w] > 0:
+            print("Needs pushing...")
+            i = 0
+            while exp.valid_score == 0 and i < 15:
+                os.remove("../data/"+set_name+"/logs/" + w + ".monitor.csv")
+                env = bench.Monitor(new_env(map_str, slippery=True), "../data/"+set_name+"/logs/" + w)
+                exp = Experiment(env, num_episodes=10000)
+                exp.run()
+                exp.validate()
+                i += 1
+
+        if exp.valid_score > scores[w]:
+            print("SUCCESS", exp.valid_score)
+        elif exp.valid_score == 0 and scores[w] == 0:
+            print("OK", exp.valid_score)
+        else:
+            print("FAIL", exp.valid_score)
+
         f = open("../data/"+set_name+"/res/"+w+".txt","w+")
         f.write(w+"\t" + str(exp.dumps()) + "\n")
         f.close()
