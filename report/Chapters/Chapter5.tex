@@ -240,8 +240,7 @@ We trained two different models for both the Generator and the Discriminator mod
 Using Batch Normalisation in the Generator network leads to much faster convergence than the model that does not make use of it.
 The Discriminator network, effectively being a much less complex model than the Generator, did not benefit from batch-normalised inputs in terms of speed of model convergence and overall cost.
 
-\section{Final architecture and results}
-%TODO: Couple of words on task generalisation + move architectures here
+\section{Final architecture and Task generalisation}
 We report here the architectures of final optimal deep neural networks for the Generator model and the Discriminator model. Figure~\ref{fig:Generator} and figure~\ref{fig:Discriminator} show a visualisation for the two networks respectively.\\\\
 \textbf{Generator}:
 \begin{itemize}[noitemsep]
@@ -284,7 +283,16 @@ We report here the architectures of final optimal deep neural networks for the G
 	\end{itemize}
 \end{itemize}
 
-Let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as it is typical with gradient-based optimisations), we also provide a version smoothed with IIR filtering, on the right. We notice that both losses asymptotically converge after around 1,000 epochs of training.
+The architectures and final design decisions were driven to the results we achieved when training the GAN in our environment set up.
+
+However, it is always important to keep in mind that the objective of our project is to provide a pipeline and discussion that is generalisable on any reinforcement learning task domain. For that reason, the details on the architectures that we presented here may differ for other domains. For example, if the distribution of policies is much more complex, the complexity of the design of the neural networks in the GAN should reflect that if we hope to capture any transferrable knowledge. Similarly, if what we are modelling is an easier problem, we want to have less complex architectures to avoid overfitting the distribution of the given training policies.
+
+This chapter should serve as a reference to the design decisions that will affect the training of the Policy GAN, and aims to aid the reader to reach an informed decision for their own use case.
+
+\section{Verification}
+It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that the GAN was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
+
+First, let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as it is typical with gradient-based optimisations), we also provide a version smoothed with IIR filtering, on the right. We notice that both losses asymptotically converge after around 1,000 epochs of training.
 
 Initially, we observe that the Discriminator's loss (in blue) hovers just around 0. That is due to the fact that the Generator was not properly trained yet (notice the its high losses in orange). In early epochs, the Generator is likely producing unrealistic policies that the Discriminator is easily able to discern.
 
@@ -298,11 +306,6 @@ It takes the Generator more epochs to train since it is a neural network with mu
 \caption{Generator and Discriminator losses over number of epochs}
 \label{fig:GANLosses}
 \end{figure}
-
-
-
-\section{Verification}
-It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that the GAN was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
 
 \subsection{Generator}
 Figure~\ref{fig:Qvalues} back in section~\ref{sec:analysisresults} showed the average intensity values of the Q-tables in the training test. As part of our verification process for the Generator, it is useful to show some samples of Q-tables that the neural network we just trained can produce.
@@ -364,8 +367,6 @@ In this subsection we present two sanity checks on the Discriminator network.
 A first verification method is to run the Discriminator network with the Q-tables/policies in the test set. In other words, run a forward pass given the Q-tables in the test set as inputs.
 
 We expect the Discriminator to label these as real Q-tables. Recall that the output of the Discriminator network is a single scalar value in $(0,1)$ representing the probability that the input policy is real or fake. The average output predicted value for the 765 policies in the test set is 0.79, indicating that the Discriminator correctly leans towards categorising these policies as being real.
-
-% TODO: Plot?
 
 As an additional check, we also retrain the test map configurations with Q-learning, but with half as many number of episodes (5,000 instead of 10,000). With fewer simulations and iterations in Q-learning, the policies that we train will yield lower average scores. We run these 1,000 of "half-trained" policies through the Discriminator once more. We obtain an average predicted score of 0.66. This is lower than the 0.79 we obtained with the policies in the test set, and it intuitively makes sense that we now obtain a lower average predicted value, since these "half-trained" policies do not fit the distribution of "fully-trained" policies in the training data.
 Another set of sanity checks we conduct is to make sure that the Discriminator is not biased towards categorising any input as being real. We generate 1,000 random 16x4 matrices, and the average predicted output of the Discriminator is 0.008, which is a good sign that we have a healthy neural network.

@@ -105,12 +105,12 @@ Similar to the approaches above, but updates the whole row of actions for the st
 \begin{equation}
 \begin{aligned}
   \forall a \in A: \\
-  Q(s_{t},a) ={} &\underbrace{Q(s_t,a_t)}_{\rm old~value} + \\
+  Q(s_{t},a) ={} &\underbrace{Q(s_t,a)}_{\rm old~value} + \\
   & + \underbrace{\alpha}_{\rm learning~rate} \times \left[
     \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
         discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
-        estimate~of~optimal~future~value}}^{\rm learned~value} - \underbrace{Q(s_t,a_t)}_{\rm old~value} \right] + \\
-   & - \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}}
+        estimate~of~optimal~future~value}}^{\rm learned~value} - \underbrace{Q(s_t,a)}_{\rm old~value} \right] + \\
+   & - \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a)}_{\rm gradient~of~D~at~Q_{t}}
 \end{aligned}
 \end{equation}
 
