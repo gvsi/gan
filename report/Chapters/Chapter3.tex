@@ -180,7 +180,7 @@ def is_valid(arr, r=0, c=0):
 \end{lstlisting}
 \end{minipage}
 
-So the \code{generate()} function returns a valid random frozen lake map represented as a list of strings. An example of an output is $["SFHH", "HFHH", "HFHH", "HFFG"]$. Each string in the list encodes a row configuration of the frozen lake.
+So the \code{generate()} function returns a valid random frozen lake map represented as a list of strings. An example of an output is \code{["SFHH", "HFHH", "HFHH", "HFFG"]}. Each string in the list encodes a row configuration of the frozen lake.
 
 What is left to do now, is to extend \code{FrozenLake-v0} so that we could pass in any map configuration, therefore exposing our randomly generated maps to the \code{gym} environment interface described earlier in section~\ref{openaigym}. Listing~\ref{lst:register} shows how to register a new environment by extending a pre-existing one.
 \\\\

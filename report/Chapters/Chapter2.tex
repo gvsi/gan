@@ -46,12 +46,15 @@ More formally, we estimate a function $Q: S \times A \to \mathbb{R}$. We can mod
 
 Here's how we update our Q-table at each time step $t$:
 \begin{equation} \label{eq:QlearningUpdate}
-  Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
-  \underbrace{\alpha}_{\rm learning~rate} \times \left[
+\begin{aligned}
+  Q(s_{t},a_{t}) ={} & \underbrace{Q(s_t,a_t)}_{\rm old~value} +
+  \underbrace{\alpha}_{\rm learning~rate} \times \\
+   & \times \left[
     \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
         discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
         estimate~of~optimal~future~value}}^{\rm learned~value} -
     \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]
+\end{aligned}
 \end{equation}
 
 where:
@@ -68,15 +71,20 @@ Algorithm~\ref{alg:Qlearning} reports the pseudocode for Q-learning.
 \caption{Q-learning}
 \label{alg:Qlearning}
 \begin{algorithmic}[1]
-\Require $n$, number of episodes to run Q-learning
-\Require $\epsilon$, probability to take random action, rather than follow policy
+\Require
+ 	\State $S$ is a set of states
+ 	\State $A$ is a set of actions
+ 	\State $\gamma$ the discount reward factor
+ 	\State $\alpha$ is the learning rate
+ 	\State $n$ is number of episodes to run Q-learning
+ 	\State $\epsilon$, probability to take random action, rather than follow policy
 \Procedure{Q-Learning} {}
-\\Initialize $Q(s,a)$ arbitrarily
-\For{each episode}
+\\Initialize $Q(s,a)$ will all 0 utility values.
+\For{each episode $e_i$ with $i=0...n$}
 \\ \qquad Initialize $s$
 \For{each step of episode}
 \\ \qquad \qquad Choose $a_t$ from $s_t$ using policy derived from $Q$ with $\epsilon$-Greedy
-\\ \qquad \qquad Take action $a_t$, observe $u$ and $s_{t+1}$
+\\ \qquad \qquad Take action $a_t$, observe reward $r$ and $s_{t+1}$
 \\ \qquad \qquad Update Q-table using equation~\ref{eq:QlearningUpdate}
 \EndFor
 \EndFor
