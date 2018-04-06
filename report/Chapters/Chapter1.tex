@@ -71,18 +71,10 @@ Now, what we want to achieve, as per our goal, is:
 	\item verify and benchmark that the test policies obtained with the new method are better than the ones trained with traditional Q-learning.
 \end{enumerate}
 
-\begin{figure}
-\centering
-\includegraphics[width=13cm]{Figures/Pipeline}
-\caption{The Data Pipeline}
-\label{fig:pipeline}
-\end{figure}
-
 %----------------------------------------------------------------------------------------
 
 \section{Structure of the report}
 Our report is structured in a what that strongly follows each component of the data pipeline outlined in the previous subsection.
-% TODO: Finish structure
 \begin{itemize}
 	\item Chapter~\ref{Chapter2} introduces important background information on reinforcement learning, Markov Decision Processes, Q-learning and Generative Adversarial Networks.
 	\item Chapter~\ref{Chapter3} details the environment being used in our experiments.
@@ -92,15 +84,23 @@ Our report is structured in a what that strongly follows each component of the d
 	\item Chapter
 \end{itemize}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=13cm]{Figures/Pipeline}
+\caption{The Data Pipeline}
+\label{fig:pipeline}
+\end{figure}
+
 %----------------------------------------------------------------------------------------
 
 \section{Main contributions}
-% TODO: Main contributions
-% Randomised Frozen Lake
-% Pipeline
-% GAN for policies design choices
-% Proof of concept of knowledge transferral
-% Distributed Q-learning
-% Techniques for Q-learning using generator and discriminator
-\	
+\begin{itemize}
+	\item We provide a design and implementation of a general data pipeline for transfer learning in reinforcement learning. We detail the main design decision that affect success in such process, allowing for as much extensibility as possible to any reinforcement learning task domains.
+	\item We provide the RL research community with a extended implementation of the \code{FrozenLake} algorithmic environment that allows for the generation of random map configurations of any given size and difficulty setting.
+	\item We provide an implementation of Policy GAN: Generative Adversarial Networks specifically designed to capture transferrable knowledge for reinforcement learning training.
+	\item We formulate several techniques that leverage the power of both generative models and discriminative neural networks to accelerate reinforcement learning on unseen tasks through the use of transferrable knowledge.
+	\item We show a proof of concept on faster convergence rate and better overall rewards through transfer learning on our environment set up.
+	\item We provide a set of metrics to critically evaluate performance of such techniques for transfer learning.
+	\item We develop a distributed implementation of MapReduce for parallel training and evaluation of Q-learning that is scalable for clusters of any number of machines.
+\end{itemize}
 %----------------------------------------------------------------------------------------
