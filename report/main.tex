@@ -224,7 +224,14 @@ headsepline, % Uncomment to get a line under the header
 
 \begin{abstract}
 \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-% TODO: Abstract
+Reinforcement Learning (RL), the problem of determining the optimal behaviour within a specific context, has seen significant progress recently, particularly thanks to the introduction of techniques that leverage Deep Neural Networks (DNN).
+While many techniques have been introduced to solve a single task, the idea of transfer learning within RL has comparably lacked major breakthroughs. The core idea of transfer is that experience gained in learning to perform one task can help improve learning performance in a related, but different, task.
+
+In our work we provide a general unsupervised framework that allows for transfer learning on unseen tasks in related domains with the use of a generative and discriminative model in an adversarial architecture: Generative Adversarial Networks (GANs).
+
+We provide a general pipeline for transfer learning using GANs that can be extended to many RL domains. We also outline the design decisions involved in adapting our pipeline for different RL problems.
+
+We show that with the knowledge captured by the GAN combined with a traditional reinforcement learning technique (Q-learning), we can achieve faster convergence rates and better overall rewards on an extension of a task available on OpenAI Gym.
 \end{abstract}
 
 %----------------------------------------------------------------------------------------
