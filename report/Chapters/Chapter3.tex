@@ -18,7 +18,7 @@ Furthermore, we also need to achieve this without losing focus on the main motiv
 
 This last point implies that a substantial part of the computational work in the project will be about training hundreds of thousands of reinforcement learning models to build a dataset over a distribution of different maps (we present this in Chapter~\ref{Chapter4}). This is an important point: in the many experiments we ran, this turned out to be the biggest bottleneck, and required plans to distribute computations across multiple machines to make the computational time feasible in the timespan allocated to the project.
 
-With these points in mind and given the experimental nature of the work, we conclude that a bottom-up approach in complexity is preferable. Given successful results with "easier" tasks, we can scale up in complexity and hopefully formalise and generalise our approach to more tasks (Chapter~\ref{Chapter7}).
+With these points in mind and given the experimental nature of the work, we conclude that a bottom-up approach in complexity is preferable. Given successful results with "easier" tasks, we can scale up in complexity and hopefully formalise and generalise our approach to more tasks.
 
 Easier tasks will enable us to explore different reinforcement learning approaches that we introduced in Subsection~\ref{RL} with the guarantee that they will give satisfiable results. We can use these results as a foundation of the further steps (specifically Generative Adversarial Networks training in Chapter~\ref{Chapter5}).
 
@@ -115,7 +115,7 @@ Before we move on, let us contextualise this in the bigger picture as to not los
 \\\\
 Listing~\ref{lst:generate} shows how we implemented the algorithm to generate random maps. The critical line is line 4, which uses \code{numpy}'s \code{random.choice()} method that samples a matrix of a given size, given probabilities for each element (\code{'F'} and \code{'H'} tiles in our case).
 
-So, we can pass in the desired size of the map. By default, it will generate 4x4 grids like the one in \code{FrozenLake-v0}, but we could generate maps of arbitrary size, which will result in higher task complexity. We explore these harder extensions in Chapter~\ref{Chapter7}. 
+So, we can pass in the desired size of the map. By default, it will generate 4x4 grids like the one in \code{FrozenLake-v0}, but we could generate maps of arbitrary size, which will result in higher task complexity.
 
 We can also pass it the probability that a tile will be a frozen one through the parameter \code{p}. The presence of fewer frozen tiles, and therefore of more holes, makes the goal harder to achieve for the agent.
 
@@ -180,7 +180,7 @@ def is_valid(arr, r=0, c=0):
 \end{lstlisting}
 \end{minipage}
 
-So the \code{generate()} function returns a valid random frozen lake map represented as a list of strings. An example of an output is $["SFHH", "HFHH", "HFHH", "HFFG"]$. Each string in the list encodes a row configuration of the frozen lake.
+So the \code{generate()} function returns a valid random frozen lake map represented as a list of strings. An example of an output is \code{["SFHH", "HFHH", "HFHH", "HFFG"]}. Each string in the list encodes a row configuration of the frozen lake.
 
 What is left to do now, is to extend \code{FrozenLake-v0} so that we could pass in any map configuration, therefore exposing our randomly generated maps to the \code{gym} environment interface described earlier in section~\ref{openaigym}. Listing~\ref{lst:register} shows how to register a new environment by extending a pre-existing one.
 \\\\

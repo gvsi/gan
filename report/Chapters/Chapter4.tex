@@ -54,8 +54,6 @@ class Experiment(object):
         self.start = datetime.now()
         # ------------------------------------------------------------
         # Run Q-learning algorithm, saving the rewards of each episode
-        # ...
-        # ...
         # ------------------------------------------------------------
         self.end = datetime.now()
         self.score = sum(rewards)/self.num_episodes
@@ -101,7 +99,7 @@ To make this step of our pipeline faster and scalable to more data, we decide to
 
 A MapReduce program is composed of a Map procedure that takes in some (large) input and performs a particular operation whose output is then fed into another Reduce procedure, which outputs the final result. The power of MapReduce is that the framework orchestrates the processing of these procedures by marshalling the distributed servers, running the various tasks in parallel, managing all communications and data transfers between the various parts of the system, and providing for redundancy and fault tolerance.
 
-Figure~\ref{fig:MapReduce} shows the distributed architecture to train multiple Q-learning instances. The input to the system is a list of strings, each representing the map configuration of a \code{RandomisedFrozenLake}, e.g. $"SFHHHFHHHFHHHFFG"$. These inputs are fed into Mapper programs running on different machines. The mapper's task is to initialise the experiment and run Q-learning on the environment. It outputs a key-value pair, where the key is the string that uniquely identifies a map configuration, and the output is the \code{Experiment} object that encapsulates the already trained Q-table. We have yet to assign a validation score to this table we trained, and that's the job of the reducer.
+Figure~\ref{fig:MapReduce} shows the distributed architecture to train multiple Q-learning instances. The input to the system is a list of strings, each representing the map configuration of a \code{RandomisedFrozenLake}, e.g. \code{"SFHHHFHHHFHHHFFG"}. These inputs are fed into Mapper programs running on different machines. The mapper's task is to initialise the experiment and run Q-learning on the environment. It outputs a key-value pair, where the key is the string that uniquely identifies a map configuration, and the output is the \code{Experiment} object that encapsulates the already trained Q-table. We have yet to assign a validation score to this table we trained, and that's the job of the reducer.
 
 Each experiment's result is then written to an output file by the reducer. Each line will be again a key-value pair, with the map configuration string as key and the \code{Experiment} result dumped in string format. In the following sections, we can just parse and load these results to conduct our further analysis.
 
@@ -123,7 +121,7 @@ We notice that the utility values in the second and third columns are, in most c
 
 Indeed, according to the reward system that we described in section~\ref{sec:adjrewardsys}, our trained models will try and reach the goal state with as few actions as possible. This validates why on average, the best actions to make at each state will be going south or going east.
 % TODO: Plot rewards plot with std
-% TODO: Define acceptable line and when it is achieved
+% Define acceptable line and when it is achieved
 
 STILL NEED TO FINISH THIS ANALYSIS
 \begin{figure}
@@ -152,13 +150,13 @@ As an intuition, imagine there are two people in a labyrinth, looking for a trea
 \label{sec:taskgeneralisation}
 We explained how we hope to capture transferrable knowledge that is generalisable across similar tasks. We do so by training a GAN using the policy distribution in our training set of policies, and we show this process in the next chapter (Chapter~\ref{Chapter5}).
 
-Before we do that, we ought to talk about how this pipeline generalises on different reinforcement learning task domains. In our work we focused on the Frozen Lake environments, but the ultimate goal of our work is to develop a data pipeline that generalises to most reinforcement learning task domains.
+Before we do that, we ought to talk about how this pipeline generalises on different reinforcement learning task domains. In our work we focused on the Frozen Lake environments, but the ultimate goal of our work is to develop a data pipeline that generalises to any reinforcement learning task domain.
 
 If we hope to transfer knowledge within a domain, one key requirement is that there needs to be transferrable knowledge across these tasks. In our main experiment, we decoded this as being the action of "going south-east". However, with many and more complex domains with a larger action space and observation space, it may not be as trivial to identify such knowledge.
 
-In our work, one of the reasons we chose Frozen Lake environments is that it is straightforward enough to verify that our agents are leveraging and benefitting from previous knowledge.
+In our work, one of the reasons we chose Frozen Lake environments is that it is straightforward enough to verify that our agents are leveraging and benefitting from previous knowledge, since we can intuitively define and predict what this knowledge is.
 
-But in many other applications, we do not expect to be able to even decode the transferred knowledge in words, as we do when we say "going south-east". We will leave that up to the deep neural networks and their inherent statistical foundations to model such behaviour given the distribution we pass it.
+But in many other applications, we do not expect to be able to even decode the transferred knowledge in words, as we do when we say "going south-east". We will leave that up to the deep neural networks and their inherent statistical foundations to model such behaviour given the distribution we pass it in an unsupervised way.
 
 By developing our pipeline for transferring knowledge, we provide a generalisable tool that people can use on their own task domains.
 

@@ -1,94 +1,170 @@
 % Chapter 6
 
-\chapter{Generative Adversarial Q-learning} % Main chapter title
-
+\chapter{Generative Adversarial Transfer Learning} % Main chapter title
 \label{Chapter6}
+At this point of our Data Pipeline, we have two trained deep neural networks: the Generator \code{G} and the Discriminator \code{D}. It is once again important to contextualise this work in the Data Pipeline presented in section~\ref{sec:datapipeline} and as we showed it in figure~\ref{fig:pipeline}.
+
+\code{G} is able to generate Q-tables, which we can effectively consider our optimal policies that solve a set of similar tasks. \code{D} returns an indication of on the "realness" or quality of a Q-table.
+Both \code{G} and \code{D} hopefully capture the data distribution of the training data, which were just a subset of the Q-tables we generated in Chapter~\ref{Chapter4}.
+
+Next up in our work is to develop and propose different reinforcement learning algorithms that can leverage the knowledge that we captured through the Generative Adversarial Network. We aim to transfer such knowledge to the tasks in the test set. We hope to achieve better rewards as well as lower training times than the policies we trained with vanilla Q-learning.
+
+The algorithms that we propose in this Chapter mostly build on the Q-learning procedure that we presented back in section~\ref{qlearning}. In the techniques that we propose, we integrate Q-learning with the Generator \code{G} and Discriminator \code{D} neural networks in different ways.
+
+In the context of our discussion on task generalisation that we already started in section~\ref{sec:taskgeneralisation}, we also need to discuss how these techniques generalise to other reinforcement learning task domains. 
+
+We empirically test all these techniques on our \code{RandomisedFrozenLake} environment setup, and therefore we get an indication on the successes and failures of such techniques with a bias on this environment. We report the results of each technique in the following chapter (Chapter~\ref{Chapter7} - Benchmarking).
+
+Given this disclaimer, we nevertheless endeavour to provide a data pipeline for transfer learning using GANs that generalises as much as possible to any reinforcement learning task.
+
+Because of this, some of the techniques we propose here have not necessarily been successful with our environment setup, but can, within reasonable expectations, be in other task domains with different transferred knowledge, environment dynamics, and data distributions of policies.
+
+As it is common in reinforcement learning and deep learning applications, empirical exploration of different techniques is the most effective way to verify which is a best fit in the given problem.
 
 %----------------------------------------------------------------------------------------
 \section{Using the trained Discriminator}
-\subsection{Speeding up Q-learning on unseen maps}
+The Discriminator network \code{D} takes in as an input a Q-table, and outputs a single scalar in $[0,1]$ representing the predicted probability that the inputted Q-table is a genuine one.
 
-\subsubsection{Approach 1}
-\[Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q_{t})}_{\rm gradient~of~D~at~Q_{t}}\]
+One way to leverage this to achieve our goal is by asking the following question:\\
 
-\subsubsection{Approach 2}
-  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
-  \underbrace{\alpha}_{\rm learning~rate} \times \left[
+\begin{addmargin}[2.5em]{2.5em}
+"How should we update the values of the Q-table that we inputted to \code{D}, so that if we input the updated Q-table, the score that the Discriminator returns is higher (i.e. the Q-table becomes more genuine)?"\\
+\end{addmargin}
+
+This in fact turns out to be the same fundamental question of any gradient-based optimisation technique in machine learning. When doing vanilla gradient descent, for example, we ask ourselves a similar question: "how should we update our model's parameter set so that we minimise the loss function?", the answer to which is "by moving in the opposite direction of the loss function's gradient with respect to our parameter".
+
+This gives us a way to find a Q-table update. The loss function in our case is how far we are from having the discriminator label the Q-table as being real, that is how far is the predicted output from a label of one: $1 - y_{predicted}$.
+
+So what we need to calculate is the discriminator loss's gradient with respect to the Q-table, which we call $\nabla D(Q_{t})$.
+
+Recall the algorithm for Q-learning. The way we can use $\nabla D(Q_{t})$ is by combining the vanilla Q-learning update step of equation~\ref{eq:QlearningUpdate} to an update with the gradient step.
+
+\begin{algorithm}[H]
+\caption{Q-learning with gradient update}
+\begin{algorithmic}[1]
+\Require
+ 	\State $S$ is a set of states
+ 	\State $A$ is a set of actions
+ 	\State $\gamma$ the discount reward factor
+ 	\State $\alpha$ is the learning rate
+ 	\State $n$ is number of episodes to run Q-learning
+ 	\State $\epsilon$, probability to take random action, rather than follow policy
+\Procedure{Q-Learning} {}
+\\Initialize $Q(s,a)$ will all 0 utility values.
+\For{each episode $e_i$ with $i=0...n$}
+\\ \qquad Initialize $s$
+\For{each step of episode}
+\\ \qquad \qquad Choose $a_t$ from $s_t$ using policy derived from $Q$ with $\epsilon$-Greedy
+\\ \qquad \qquad Take action $a_t$, observe reward $r$ and $s_{t+1}$
+\\ \qquad \qquad Update Q-table using $\nabla D(Q_{t})$
+\EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Baseline approach: Q-learning}
+This is the basic update step of vanilla Q-learning.
+
+\begin{equation} \label{eq:QlearningUpdate}
+\begin{aligned}
+  Q(s_{t},a_{t}) ={} & \underbrace{Q(s_t,a_t)}_{\rm old~value} +
+  \underbrace{\alpha}_{\rm learning~rate} \times \\
+   & \times \left[
     \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
         discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
         estimate~of~optimal~future~value}}^{\rm learned~value} -
-    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
-    
-    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
+    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]
+\end{aligned}
+\end{equation}
 
-\subsubsection{Approach 3}
+\subsection{Approach 1: Update whole Q-table towards $\nabla D(Q_{t})$}
+In this approach we update whole Q-table in the direction of the gradient. We precede this with a vanilla Q-learning update step.
 
-  \[Q(s_{t},a_{t}) = \underbrace{Q(s_t,a_t)}_{\rm old~value} +
-  \underbrace{\alpha}_{\rm learning~rate} \times \left[
+\begin{equation}
+Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q_{t})}_{\rm gradient~of~D~at~Q_{t}}
+\end{equation}
+
+\subsection{Approach 2: Update state/action value pair towards $\nabla D(Q_{t})$}
+This approach is similar to the one before, but just like Q-learning, we only update the state/action pair of the step the agent just took in the environment. This approach combines Q-learning's update approach with our gradient-based update.
+
+\begin{equation}
+\begin{aligned}
+  Q(s_{t},a_{t}) ={} &\underbrace{Q(s_t,a_t)}_{\rm old~value} + \\
+  & + \underbrace{\alpha}_{\rm learning~rate} \times \left[
     \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
         discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
-        estimate~of~optimal~future~value}}^{\rm learned~value} -
-    \underbrace{Q(s_t,a_t)}_{\rm old~value} \right]\]
-    
-    \[- \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}} \]
+        estimate~of~optimal~future~value}}^{\rm learned~value} - \underbrace{Q(s_t,a_t)}_{\rm old~value} \right] + \\
+   & - \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a_{t})}_{\rm gradient~of~D~at~Q_{t}}
+\end{aligned}
+\end{equation}
+
+\subsection{Approach 3: Update state/action row towards $\nabla D(Q_{t})$}
+Similar to the approaches above, but updates the whole row of actions for the state the agent is in.
+
+\begin{equation}
+\begin{aligned}
+  \forall a \in A: \\
+  Q(s_{t},a) ={} &\underbrace{Q(s_t,a)}_{\rm old~value} + \\
+  & + \underbrace{\alpha}_{\rm learning~rate} \times \left[
+    \overbrace{\underbrace{r_{t+1}}_{\rm reward} + \underbrace{\gamma}_{\rm
+        discount~factor} \underbrace{\max_{a}Q(s_{t+1}, a)}_{\rm
+        estimate~of~optimal~future~value}}^{\rm learned~value} - \underbrace{Q(s_t,a)}_{\rm old~value} \right] + \\
+   & - \underbrace{\beta}_{\rm discriminator~learning~rate} \times \underbrace{\nabla D(Q)(s_{t}, a)}_{\rm gradient~of~D~at~Q_{t}}
+\end{aligned}
+\end{equation}
 
 %   \[\frac{\sum_{i}^{test~set} valid\_score(Q_i) - valid\_score(Q_i')}{\#(test~set)}\]
-
-
-
-Recall the $Q$ function:
-
-\begin{equation*}
-Q(s,a) = R(s) + \gamma \sum_{s'}P(s'|s,a)V(s')
-\end{equation*}
-
-We can run dynamic programming (value iteration) by performing the
-Bellman back-ups in terms of the $Q$ function as follows:
-
-\begin{eqnarray*}
-&& \mbox{Iterate: } \\
-&& \forall s, a: Q(s,a) \leftarrow R(s) + \gamma \sum_{s'} P(s'|s,a) \max_{a'} Q(s',a')
-\end{eqnarray*}
-
-
-
-Initialize $Q(s,a)$ arbitrary ($\forall s, a$). 
-\begin{itemize}
-\item For $t = 0, 1, 2, \ldots$
-\subitem Choose the action $a_t$ for the current state $s_t$. (E.g., by using an $\epsilon$ greedy policy.)
-\subitem Take action $a_t$, observe $R(s_t)$, $s_{t+1}$
-\subitem $Q(s_t,a_t) \leftarrow (1-\alpha_t)Q(s_t,a_t) + \alpha_t[R(s) + \gamma \displaystyle \max_{a} \displaystyle{Q(s_{t+1}, a)}] \ \ \ \ \ \ (*)$
-\end{itemize}
-
-%\begin{algorithm}
-%\begin{algorithmic}[1]
-%\Require
-% 	\STATE $S$ is a set of states
-% 	\STATE $A$ is a set of actions
-% 	\STATE $\gamma$ the discount reward factor
-% 	\STATE $\alpha$ is the learning rate
-%\Procedure{Q-Learning}{$S,A,\gamma,\alpha$}
-%	\STATE real array $Q[S,A]$
-%	\STATE previous state $s$
-%	\STATE previous action $a$
-%	\STATE initialise $Q[S,A]$ arbitrarily
-%	\STATE observe current state s
-%	\Repeat
-%		\STATE select and carry out an action $a$
-%		\STATE observe reward $r$ and state $s'$
-%		\STATE $Q[s,a] \gets Q[s,a]+\alpha(r+\gamma max_{a'}Q[s',a']-Q[s,a])$
-%		\STATE $s \gets s'$
-%	\Until{termination}
-%\EndProcedure
-%\end{algorithmic}
-%\caption{Q-Learing Procedure.}\label{alg:qlearning}
-%\end{algorithm}
-
 
 %----------------------------------------------------------------------------------------
 
 \section{Using the trained Generator}
-\subsection{Initialisation}
-%\subsection{Exploration}
+We can categorise Q-learning and the approaches that we just presented as being "local search" in the space of possible policies that solve the task. That is, we search over possible Q-tables/policies by just applying local changes when we update the Q-table at each time step.
+
+Another heuristic method for optimisation problems is global search, that is searching all possible solutions and choosing the one that maximises the achieved rewards.
+
+\subsection{Approach 1: Global Search}
+Global search is effectively a bruteforce method to obtain a policy that 
+that solves a task. While this may seem like a non-optimal approach, if we already have a distribution of potential policies, global search may be the least computationally expensive approach.
+In fact, we can try and sample a fixed number of Q-tables/policies from the Generator network, and check the rewards that each of these policies yields.
+
+\subsection{Approach 2: Local/Global search hybrid}
+The issue with global search, is that the solutions that we may find, while yielding good rewards, are not necessarily optimised for the specific task at hand. We could be achieving better overall rewards if we did some local search using the Q-table we found through global search.
+
+To do that we can do our global search on a fixed number of sampled policies, and choose the best Q-table. 
+Now, to do local search, we can choose any of approaches we introduced in the previous section, but instead of initialising the Q-table with 0 values, we initialise it as the Q-table we just found with global search.
+
+\begin{algorithm}[H]
+\caption{Global search and Q-learning with gradient update}
+\begin{algorithmic}[1]
+\Require
+	\State $p$ number of policies to sample for global search
+ 	\State $S$ is a set of states
+ 	\State $A$ is a set of actions
+ 	\State $\gamma$ the discount reward factor
+ 	\State $\alpha$ is the learning rate
+ 	\State $n$ is number of episodes to run Q-learning
+ 	\State $\epsilon$, probability to take random action, rather than follow policy
+\Procedure{Global Search} {}
+\For{i in $i=0...p$}
+\\ \qquad Sample Q-table from the Generator
+\\ \qquad Evaluate the Q-table/policy
+\EndFor
+\\ Let $Q_{best}$ be the Q-table that yields the best policy
+\EndProcedure
+\Procedure{Q-Learning} {}
+\\Initialize Q = $Q_{best}$
+\For{each episode $e_i$ with $i=0...n$}
+\\ \qquad Initialize $s$
+\For{each step of episode}
+\\ \qquad \qquad Choose $a_t$ from $s_t$ using policy derived from $Q$ with $\epsilon$-Greedy
+\\ \qquad \qquad Take action $a_t$, observe reward $r$ and $s_{t+1}$
+\\ \qquad \qquad Update Q-table using $\nabla D(Q_{t})$
+\EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
 
 %----------------------------------------------------------------------------------------

@@ -3,9 +3,9 @@
 \chapter{Adversarial Networks Training} % Main chapter title
 \label{Chapter5} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 
-Now that we built our dataset, we have the data we need to proceed with the adversarial training of our pipeline.
+Now that we built our dataset, we have the data we need to proceed with the adversarial training step of our pipeline.
 
-It is once again important to place this chapter in the context of our data pipeline, as we introduced it in section~\ref{sec:datapipeline} and as we showed it in figure~\ref{fig:pipeline}. The dataset we just created is composed of policies (which are just tables or 2D matrices).  More specifically we have 3,827 such policies, corresponding to all the 3,827 different valid map configurations of our environment, \code{RandomisedFrozenLake}. We split the dataset in a training subset (80\%) of the total number of policies, and the test subset (the remaining 20\%).
+It is once again important to place this chapter in the context of our data pipeline, as we introduced it in section~\ref{sec:datapipeline} and as we showed it in figure~\ref{fig:pipeline}. The dataset we just created is composed of Q-tables, which are effectively a representation of our policy.  More specifically we have 3,827 such policies, corresponding to all the 3,827 different valid map configurations of our environment, \code{RandomisedFrozenLake}. We split the dataset in a training subset (80\%) of the total number of policies, and the test subset (the remaining 20\%).
 
 In section~\ref{sec:gan} we introduced Generative Adversarial Networks, detailing their vanilla architecture, as they were introduced by \citeauthor{goodfellow2014generative}. We now build off of this architecture to build a GAN architecture for policy generation.
 
@@ -28,7 +28,7 @@ Building neural net architecture that work well in practice generally involves f
 
 As we can notice, the Generator network outputs a vector of size dimension 64, which we can then reshape to a 16x4 matrix. This is our 'fake', generated Q-table. Its input is just a the latent space vector $z$ of size 100 whose values we can set randomly. We can interpret $z$ as a noise vector which deterministically influences the Q-table that we generate. While we can vary $z$ and obtain different Q-tables, these generated Q-tables should still fall within the initial distributions of Q-tables we have in our dataset, provided that the Generator was trained properly.
 
-The Discriminator network, in turn, takes in an input a vector of size 64 (which is a reshaped 16x4 Q-table), and outputs a single scalar in $[0,1]$ representing the predicted probability that the inputted Q-table is a generated policy or one sampled from the dataset.
+The Discriminator network, in turn, takes in an input a vector of size 64 (which is a reshaped 16x4 Q-table), and outputs a single scalar in $[0,1]$ representing the predicted probability that the inputted Q-table is a generated Q-table or one sampled from the dataset.
 
 
 \begin{figure}
@@ -72,7 +72,7 @@ Adam (algorithm \ref{alg:Adam}) is best described as a combination of RMSProp an
    \While{stopping criterion not met}{}
    \State Sample a minibatch of $m$ examples from the training set $\{x^{(1)},...,x^{(m)}\}$ with corresponding targets $y^{i}$.
    \State Compute gradient: $\boldsymbol{g \leftarrow \frac{1}{m}\nabla_\theta \sum_i L(f(x^{(i)}; \theta), y^{(i)}).}$
-   \State Accumulate squared gradient: \\ $\boldsymbol{r \leftarrow \rho r + (1 - \rho) g \odot g}$
+   \State Accumulate squared gradient: $\boldsymbol{r \leftarrow \rho r + (1 - \rho) g \odot g}$
    \State Compute parameter update: $\boldsymbol{\Delta\theta = -\frac{\epsilon}{\sqrt{\delta+r}} \odot g.}$ ($\frac{1}{\sqrt{\delta+r}}$ applied element-wise)
    \State Apply update: $\boldsymbol{\theta \leftarrow \theta + \Delta \theta}$
    \EndWhile
@@ -240,8 +240,7 @@ We trained two different models for both the Generator and the Discriminator mod
 Using Batch Normalisation in the Generator network leads to much faster convergence than the model that does not make use of it.
 The Discriminator network, effectively being a much less complex model than the Generator, did not benefit from batch-normalised inputs in terms of speed of model convergence and overall cost.
 
-\section{Final architecture and results}
-%TODO: Couple of words on task generalisation + move architectures here
+\section{Final architecture and Task generalisation}
 We report here the architectures of final optimal deep neural networks for the Generator model and the Discriminator model. Figure~\ref{fig:Generator} and figure~\ref{fig:Discriminator} show a visualisation for the two networks respectively.\\\\
 \textbf{Generator}:
 \begin{itemize}[noitemsep]
@@ -284,11 +283,20 @@ We report here the architectures of final optimal deep neural networks for the G
 	\end{itemize}
 \end{itemize}
 
-Let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as it is typical with gradient-based optimisations), we also provide a version smoothed with IIR filtering, on the right. We notice that both losses asymptotically converge after around 1,000 epochs of training.
+The architectures and final design decisions were driven to the results we achieved when training the GAN in our environment set up.
+
+However, it is always important to keep in mind that the objective of our project is to provide a pipeline and discussion that is generalisable on any reinforcement learning task domain. For that reason, the details on the architectures that we presented here may differ for other domains. For example, if the distribution of policies is much more complex, the complexity of the design of the neural networks in the GAN should reflect that if we hope to capture any transferrable knowledge. Similarly, if what we are modelling is an easier problem, we want to have less complex architectures to avoid overfitting the distribution of the given training policies.
+
+This chapter should serve as a reference to the design decisions that will affect the training of the Policy GAN, and aims to aid the reader to reach an informed decision for their own use case.
+
+\section{Verification}
+It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that the GAN was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
+
+First, let us look at the convergence of both networks. We plot the losses of both Generator and Discriminator in figure~\ref{fig:GANLosses}. The graph on the left reports the actual values for both losses. Since these tend to oscillate greatly during training (as it is typical with gradient-based optimisations), we also provide a version smoothed with IIR filtering, on the right. We notice that both losses asymptotically converge after around 1,000 epochs of training.
 
 Initially, we observe that the Discriminator's loss (in blue) hovers just around 0. That is due to the fact that the Generator was not properly trained yet (notice the its high losses in orange). In early epochs, the Generator is likely producing unrealistic policies that the Discriminator is easily able to discern.
 
-However, as we train the Generator a few more epochs, the policies that it produces tend to fit the initial distribution of policies more, which make its loss decrease, and the Discriminator loss increase slightly. Both then converge after a few more hundred epochs, at around epoch 1,000.
+However, as we train the Generator a few more epochs, the Q-tables/policies that it produces tend to fit the initial distribution more, which makes its loss decrease, and the Discriminator's loss increase slightly. Both then converge after a few more hundred epochs, at around epoch 1,000.
 
 It takes the Generator more epochs to train since it is a neural network with much higher complexity (one additional hidden layer, and more hidden units). This explains the trend of both losses that the figure reports.
 
@@ -298,11 +306,6 @@ It takes the Generator more epochs to train since it is a neural network with mu
 \caption{Generator and Discriminator losses over number of epochs}
 \label{fig:GANLosses}
 \end{figure}
-
-
-
-\section{Verification}
-It is useful to run a series of verification steps as a sanity check to the two neural networks that we just trained. While these do not give us a definite indication that the GAN was able to correctly capture and model the distribution in the training data, it is still useful to have a verification step in our pipeline.
 
 \subsection{Generator}
 Figure~\ref{fig:Qvalues} back in section~\ref{sec:analysisresults} showed the average intensity values of the Q-tables in the training test. As part of our verification process for the Generator, it is useful to show some samples of Q-tables that the neural network we just trained can produce.
@@ -364,8 +367,6 @@ In this subsection we present two sanity checks on the Discriminator network.
 A first verification method is to run the Discriminator network with the Q-tables/policies in the test set. In other words, run a forward pass given the Q-tables in the test set as inputs.
 
 We expect the Discriminator to label these as real Q-tables. Recall that the output of the Discriminator network is a single scalar value in $(0,1)$ representing the probability that the input policy is real or fake. The average output predicted value for the 765 policies in the test set is 0.79, indicating that the Discriminator correctly leans towards categorising these policies as being real.
-
-% TODO: Plot?
 
 As an additional check, we also retrain the test map configurations with Q-learning, but with half as many number of episodes (5,000 instead of 10,000). With fewer simulations and iterations in Q-learning, the policies that we train will yield lower average scores. We run these 1,000 of "half-trained" policies through the Discriminator once more. We obtain an average predicted score of 0.66. This is lower than the 0.79 we obtained with the policies in the test set, and it intuitively makes sense that we now obtain a lower average predicted value, since these "half-trained" policies do not fit the distribution of "fully-trained" policies in the training data.
 Another set of sanity checks we conduct is to make sure that the Discriminator is not biased towards categorising any input as being real. We generate 1,000 random 16x4 matrices, and the average predicted output of the Discriminator is 0.008, which is a good sign that we have a healthy neural network.
