@@ -63,7 +63,9 @@ Recall the algorithm for Q-learning. The way we can use $\nabla D(Q_{t})$ is by 
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Baseline approach: Q-learning}
+\subsection{Baselines approach: Q-learning and L2 regulariser}
+\label{ssec:QlearningBaseline}
+
 This is the basic update step of vanilla Q-learning.
 
 \begin{equation} \label{eq:QlearningUpdate}
@@ -78,7 +80,10 @@ This is the basic update step of vanilla Q-learning.
 \end{aligned}
 \end{equation}
 
+Another baseline model that we can consider is the one that transfers knowledge through L2 regularisation, by pushing the Q-table towards the average of the tasks in the train set. In figure~\ref{fig:Qvalues} we displayed such mean values of the train set. With this regulariser we try to take a step towards this average.
+
 \subsection{Approach 1: Update whole Q-table towards $\nabla D(Q_{t})$}
+\label{ssec:QlearningGANWhole}
 In this approach we update whole Q-table in the direction of the gradient. We precede this with a vanilla Q-learning update step.
 
 \begin{equation}
@@ -86,6 +91,7 @@ Q_{t+1} = Q_{t}-\underbrace{\beta}_{\rm discriminator~learning~rate} \times \und
 \end{equation}
 
 \subsection{Approach 2: Update state/action value pair towards $\nabla D(Q_{t})$}
+\label{ssec:QlearningGANPair}
 This approach is similar to the one before, but just like Q-learning, we only update the state/action pair of the step the agent just took in the environment. This approach combines Q-learning's update approach with our gradient-based update.
 
 \begin{equation}
@@ -100,6 +106,7 @@ This approach is similar to the one before, but just like Q-learning, we only up
 \end{equation}
 
 \subsection{Approach 3: Update state/action row towards $\nabla D(Q_{t})$}
+\label{ssec:QlearningGANRow}
 Similar to the approaches above, but updates the whole row of actions for the state the agent is in.
 
 \begin{equation}
@@ -124,11 +131,13 @@ We can categorise Q-learning and the approaches that we just presented as being 
 Another heuristic method for optimisation problems is global search, that is searching all possible solutions and choosing the one that maximises the achieved rewards.
 
 \subsection{Approach 1: Global Search}
+\label{ssec:globalsearch}
 Global search is effectively a bruteforce method to obtain a policy that 
 that solves a task. While this may seem like a non-optimal approach, if we already have a distribution of potential policies, global search may be the least computationally expensive approach.
 In fact, we can try and sample a fixed number of Q-tables/policies from the Generator network, and check the rewards that each of these policies yields.
 
 \subsection{Approach 2: Local/Global search hybrid}
+\label{ssec:localglobalsearch}
 The issue with global search, is that the solutions that we may find, while yielding good rewards, are not necessarily optimised for the specific task at hand. We could be achieving better overall rewards if we did some local search using the Q-table we found through global search.
 
 To do that we can do our global search on a fixed number of sampled policies, and choose the best Q-table. 

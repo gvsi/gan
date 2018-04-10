@@ -18,7 +18,7 @@ We have presented Q-learning in section~\ref{qlearning} as a method that generat
 
 This table $Q$ is represented as a 2D-matrix of size (\code{env.observation\_space.n}, \code{env.action\_space.n}), which in the case of \code{RandomisedFrozenLake} is just a (16x4) matrix.
 
-This is good news. Having a policy that is encoded as a 2-dimensional data structure makes it an obvious input to our Generative Adversarial Network later on in the next chapter. In fact, as we presented in section~\ref{successes}, GANs have proven successful in image synthesis applications, where inputs were images, that is 2D matrices.
+This is good news. Having a policy that is encoded as a 2-dimensional data structure makes it an obvious input to our Generative Adversarial Network later on in the next chapter. In fact, GANs have proven successful in image synthesis applications, where inputs were images, that is 2D matrices.
 
 The choice of Q-learning as our reinforcement learning technique therefore becomes preferable. Other model-free algorithms like policy search may not have a clear 2D representation in the way the trained parameter set $\theta$ is encoded.
 
@@ -123,7 +123,6 @@ Indeed, according to the reward system that we described in section~\ref{sec:adj
 % TODO: Plot rewards plot with std
 % Define acceptable line and when it is achieved
 
-STILL NEED TO FINISH THIS ANALYSIS
 \begin{figure}
 \centering
 \includegraphics[width=3cm]{Figures/Qtable_mean}
